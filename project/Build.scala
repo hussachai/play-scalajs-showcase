@@ -94,7 +94,10 @@ object Dependencies {
 
   val scalajs = Seq(
     "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % Versions.scalajsDom,
-    "org.scala-lang.modules.scalajs" %% "scalajs-jasmine-test-framework" % scalaJSVersion % "test"
+    "org.scala-lang.modules.scalajs" %% "scalajs-jasmine-test-framework" % scalaJSVersion % "test",
+    "com.scalatags" %%% "scalatags" % "0.3.0",
+    "com.scalarx" %%% "scalarx" % "0.2.5",
+    "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6"
   ) ++ shared
 }
 

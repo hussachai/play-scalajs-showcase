@@ -1,4 +1,4 @@
-@(title: String)(content: Html)
+@(title: String, header: Html = Html(""))(content: Html)
 
 <!DOCTYPE html>
 
@@ -8,13 +8,14 @@
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
     <script src="@routes.Assets.at("lib/jquery/jquery.min.js")" type="text/javascript"></script>
+    @header
   </head>
   <body>
-    @content
     <script src="@routes.Assets.at("javascripts/scalajs-example-fastopt.js")" type="text/javascript"></script>
     <!-- for production (play dist), use the optimized version instead -->
     <!-- <script src="@routes.Assets.at("javascripts/scalajs-example-opt.js")" type="text/javascript"></script> -->
 
     <script src="@routes.Assets.at("javascripts/scalajs-example-launcher.js")" type="text/javascript"></script>
+    @content
   </body>
 </html>
