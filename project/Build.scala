@@ -6,7 +6,11 @@ import ScalaJSKeys._
 import com.typesafe.sbt.packager.universal.UniversalKeys
 import com.typesafe.sbteclipse.core.EclipsePlugin.EclipseKeys
 
+import play.Play.autoImport._
+import PlayKeys._
+
 object ApplicationBuild extends Build with UniversalKeys {
+
 
   val scalajsOutputDir = Def.settingKey[File]("directory for javascript files output by scalajs")
 
@@ -89,12 +93,16 @@ object Dependencies {
   val shared = Seq()
 
   val scalajvm = Seq(
+    jdbc,
+    anorm,
+    "com.lihaoyi" %% "upickle" % "0.1.3",
     "org.webjars" % "jquery" % "1.9.0"
   ) ++ shared
 
   val scalajs = Seq(
     "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % Versions.scalajsDom,
     "org.scala-lang.modules.scalajs" %% "scalajs-jasmine-test-framework" % scalaJSVersion % "test",
+    "com.lihaoyi" %%% "upickle" % "0.1.3",
     "com.scalatags" %%% "scalatags" % "0.3.0",
     "com.scalarx" %%% "scalarx" % "0.2.5",
     "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6"

@@ -1,3 +1,3 @@
 package shared
 
-case class Task(txt: String, done: Boolean)
+case class Task(id: Option[Long], txt: String, done: Boolean)
