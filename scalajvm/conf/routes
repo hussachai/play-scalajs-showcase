@@ -3,11 +3,12 @@
 # ~~~~
 
 # Home page
-GET        /                     controllers.Application.index
+GET         /                        controllers.Application.index
 
-GET        /todos                controllers.TodoController.index
-GET        /todos/all            controllers.TodoController.all
-POST       /todos/create         controllers.TodoController.create
+GET         /todos                   controllers.TodoController.index
+GET         /todos/all               controllers.TodoController.all
+POST        /todos/create            controllers.TodoController.create
+POST        /todos/update/:id        controllers.TodoController.update(id: Long)
 
 # Map static resources from the /public folder to the /assets URL path
-GET        /assets/*file        controllers.Assets.at(path="/public", file)
+GET         /assets/*file            controllers.Assets.at(path="/public", file)

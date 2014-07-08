@@ -4,7 +4,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{Json=>_, _}
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Result, Request, Action, Controller}
 import scala.concurrent.Future
 import models.TaskModel
 import upickle._
@@ -33,15 +33,29 @@ object TodoController extends Controller{
   }
 
   def create = Action.async(parse.json){ implicit request =>
+    val fn = (txt: String, done: Boolean) =>
+      TaskModel.store.create(txt, done).map{ r =>
+        Ok(write(r))
+      }.recover{ case e => InternalServerError}
+    executeRequest(fn)
+  }
+
+  def update(id: Long) = Action.async(parse.json){ implicit request =>
+    val fn = (txt: String, done: Boolean) =>
+      TaskModel.store.update(Task(Some(id), txt, done)).map{ r =>
+        if(r) Ok else BadRequest
+      }.recover{ case e => InternalServerError}
+    executeRequest(fn)
+  }
+
+  def executeRequest(fn: (String, Boolean) => Future[Result])
+    (implicit request: Request[JsValue]) = {
     request.body.validate[(String, Boolean)].map{
       case (txt, done) => {
-        TaskModel.store.create(txt, done).map{ r =>
-          Ok(taskPickler.write(r).asInstanceOf[JsValue])
-        }.recover{case e => InternalServerError}
+        fn(txt, done)
       }
     }.recoverTotal{
       e => Future(BadRequest)
     }
   }
-
 }

@@ -97,7 +97,7 @@ object TaskAnormStore extends TaskStore{
 
   override def all(): Future[List[Task]] = Future{
     DB.withConnection { implicit c =>
-      SQL("SELECT * FROM Tasks").as(long("id").? ~ str("txt") ~ bool("done") *).map{
+      SQL("SELECT * FROM Tasks ORDER BY id DESC").as(long("id").? ~ str("txt") ~ bool("done") *).map{
         case id ~ txt ~ done => Task(id, txt, done)
       }
     }
