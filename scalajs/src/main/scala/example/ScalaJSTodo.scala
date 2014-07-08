@@ -7,8 +7,6 @@ import tags2.section
 import rx._
 import scala.scalajs.js.annotation.JSExport
 import shared.Task
-import upickle.Implicits._
-import scala.Some
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.Future
 
@@ -22,13 +20,14 @@ object ScalaJSTodo {
     import org.scalajs.dom.extensions.Ajax
     import org.scalajs.jquery.{jQuery=>$}
     import upickle._
+    import upickle.Implicits._
 
     implicit val taskPickler = Case3ReadWriter(Task.apply, Task.unapply)
 
     val tasks = Var(List.empty[Task])
 
     def init: Future[Unit] = {
-      Ajax.get("/todo/all").map { r =>
+      Ajax.get("/todos/all").map { r =>
         read[List[Task]](r.responseText)
       }.map{ r =>
         tasks() = r
@@ -38,7 +37,12 @@ object ScalaJSTodo {
     def all: List[Task] = tasks()
 
     def create(txt: String, done: Boolean = false) = {
-      tasks() = Task(Sequence.inc, inputBox.value, false) +: API.tasks()
+      val json = s"""{"txt": "${txt}", "done": ${done}}"""
+      val headers = Seq("Content-Type" -> "application/json")
+      Ajax.post("/todos/create", json, headers = headers).map{ r =>
+        val task = read[Task](r.responseText)
+        tasks() = task +: API.tasks()
+      }
     }
 
   }
@@ -85,7 +89,7 @@ object ScalaJSTodo {
       form(
         inputBox,
         onsubmit := { () =>
-          API.tasks() = Task(Sequence.inc, inputBox.value, false) +: API.tasks()
+          API.create(inputBox.value)
           inputBox.value = ""
           false
         }
