@@ -2,9 +2,9 @@ package models
 
 import scala.concurrent.Future
 import shared.Task
-import play.api.db.DB
 import play.api.Play.current
 import scala.concurrent.ExecutionContext.Implicits.global
+
 
 object TaskModel {
 
@@ -27,7 +27,7 @@ trait TaskStore {
 
  def update(task: Task): Future[Boolean]
 
- def delete(id: Int): Future[Boolean]
+ def delete(id: Long): Future[Boolean]
 
 }
 
@@ -44,14 +44,56 @@ object TaskMemStore extends TaskStore {
     ???
   }
 
-  override def delete(id: Int): Future[Boolean] = Future{
+  override def delete(id: Long): Future[Boolean] = Future{
     ???
+  }
+}
+
+object TaskSlickStore extends TaskStore {
+
+  import play.api.db.slick.Config.driver.simple._
+  //import scala.slick.driver.H2Driver.simple._
+  import play.api.db.slick._
+
+  class Tasks(tag: Tag) extends Table[Task](tag, "Tasks"){
+    def id   = column[Option[Long]]("id", O.PrimaryKey, O.AutoInc)
+    def txt  = column[String]("txt")
+    def done = column[Boolean]("done")
+    def * = (id, txt, done) <> (Task.tupled, Task.unapply)
+  }
+
+  val tasks = TableQuery[Tasks]
+
+  override def all(): Future[List[Task]] = Future{
+    DB.withSession{ implicit session =>
+      tasks.list
+    }
+  }
+
+  override def create(txt: String, done: Boolean): Future[Task] = Future{
+    DB.withSession{ implicit session =>
+      (tasks returning tasks.map(_.id) into ((task,id) => task.copy(id=id))) += Task(None, txt, done)
+    }
+  }
+
+  override def update(task: Task): Future[Boolean] = Future{
+    DB.withSession{ implicit session =>
+      val q = for { t <- tasks if t.id === task.id } yield (t.txt, t.done)
+      q.update(task.txt, task.done) == 1
+    }
+  }
+
+  override def delete(id: Long): Future[Boolean] = Future{
+    DB.withSession { implicit session =>
+      tasks.filter(_.id === id).delete == 1
+    }
   }
 }
 
 object TaskAnormStore extends TaskStore{
   import anorm._
   import anorm.SqlParser._
+  import play.api.db.DB
 
   override def all(): Future[List[Task]] = Future{
     DB.withConnection { implicit c =>
@@ -77,7 +119,7 @@ object TaskAnormStore extends TaskStore{
     }
   }
 
-  override def delete(id: Int): Future[Boolean] = Future{
+  override def delete(id: Long): Future[Boolean] = Future{
     DB.withConnection { implicit c =>
       val sql = "DELETE Tasks WHERE id = {id}"
       SQL(sql).on('id -> id).executeUpdate() == 1

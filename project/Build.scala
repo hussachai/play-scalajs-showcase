@@ -29,7 +29,7 @@ object ApplicationBuild extends Build with UniversalKeys {
   ) settings (scalajsSettings: _*)
 
   lazy val sharedScala = Project(
-    id = "sharedScala",
+    id = "scala",
     base = file(sharedSrcDir)
   ) settings (sharedScalaSettings: _*)
 
@@ -64,6 +64,7 @@ object ApplicationBuild extends Build with UniversalKeys {
   lazy val sharedScalaSettings =
     Seq(
       name := "shared-scala-example",
+      scalaVersion := Versions.scala,
       scalaSource in Compile := baseDirectory.value,
       EclipseKeys.skipProject := true,
       libraryDependencies ++= Dependencies.shared
@@ -95,6 +96,8 @@ object Dependencies {
   val scalajvm = Seq(
     jdbc,
     anorm,
+    "com.typesafe.slick" %% "slick" % "2.1.0-M2",
+    "com.typesafe.play" %% "play-slick" % "0.8.0-M1",
     "com.lihaoyi" %% "upickle" % "0.1.3",
     "org.webjars" % "jquery" % "1.9.0"
   ) ++ shared

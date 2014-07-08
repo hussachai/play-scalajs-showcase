@@ -28,16 +28,19 @@ object ScalaJSTodo {
     val tasks = Var(List.empty[Task])
 
     def init: Future[Unit] = {
-      all.map{ r =>
+      Ajax.get("/todo/all").map { r =>
+        read[List[Task]](r.responseText)
+      }.map{ r =>
         tasks() = r
       }
     }
 
-    def all: Future[List[Task]] = {
-      Ajax.get("/todo/all").map { r =>
-        read[List[Task]](r.responseText)
-      }
+    def all: List[Task] = tasks()
+
+    def create(txt: String, done: Boolean = false) = {
+      tasks() = Task(Sequence.inc, inputBox.value, false) +: API.tasks()
     }
+
   }
 
   val editing = Var[Option[Task]](None)
