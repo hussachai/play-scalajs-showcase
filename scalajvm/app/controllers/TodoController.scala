@@ -20,7 +20,7 @@ object TodoController extends Controller{
     (__ \ 'done).read[Boolean]
   ) tupled
 
-  def index = Action {
+  def index = Action { implicit request =>
     Ok(views.html.todo("TODO"))
   }
 

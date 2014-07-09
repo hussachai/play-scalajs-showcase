@@ -10,7 +10,4 @@ object Application extends Controller {
     Ok(views.html.index(SharedMessages.itWorks))
   }
 
-  def todo = Action {
-    Ok(views.html.todo("TODO"))
-  }
 }
