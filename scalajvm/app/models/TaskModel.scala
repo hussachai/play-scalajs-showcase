@@ -11,6 +11,7 @@ object TaskModel {
   val store: TaskStore = current.configuration.getString("module.todo.store") match {
     case Some(impl) => impl match {
       case "Anorm" => TaskAnormStore
+      case "Slick" => TaskSlickStore
     }
     case None => TaskMemStore
   }
@@ -55,10 +56,10 @@ object TaskSlickStore extends TaskStore {
   //import scala.slick.driver.H2Driver.simple._
   import play.api.db.slick._
 
-  class Tasks(tag: Tag) extends Table[Task](tag, "Tasks"){
-    def id   = column[Option[Long]]("id", O.PrimaryKey, O.AutoInc)
-    def txt  = column[String]("txt")
-    def done = column[Boolean]("done")
+  class Tasks(tag: Tag) extends Table[Task](tag, "TASKS"){
+    def id   = column[Option[Long]]("ID", O.PrimaryKey, O.AutoInc)
+    def txt  = column[String]("TXT")
+    def done = column[Boolean]("DONE")
     def * = (id, txt, done) <> (Task.tupled, Task.unapply)
   }
 
@@ -66,7 +67,7 @@ object TaskSlickStore extends TaskStore {
 
   override def all(): Future[List[Task]] = Future{
     DB.withSession{ implicit session =>
-      tasks.list
+      tasks.sortBy(_.id.desc).list
     }
   }
 

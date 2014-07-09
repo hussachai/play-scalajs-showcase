@@ -1,5 +1,6 @@
 package example
 
+import config.Routes
 import org.scalajs.dom
 import scalatags.JsDom._
 import all._
@@ -9,6 +10,7 @@ import scala.scalajs.js.annotation.JSExport
 import shared.Task
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.Future
+
 
 @JSExport
 object ScalaJSTodo {
@@ -27,7 +29,7 @@ object ScalaJSTodo {
     val tasks = Var(List.empty[Task])
 
     def init: Future[Unit] = {
-      Ajax.get("/todos/all").map { r =>
+      Ajax.get(Routes.Todos.all).map { r =>
         read[List[Task]](r.responseText)
       }.map{ r =>
         tasks() = r
@@ -39,12 +41,22 @@ object ScalaJSTodo {
     def create(txt: String, done: Boolean = false) = {
       val json = s"""{"txt": "${txt}", "done": ${done}}"""
       val headers = Seq("Content-Type" -> "application/json")
-      Ajax.post("/todos/create", json, headers = headers).map{ r =>
+      Ajax.post(Routes.Todos.create, json, headers = headers).map{ r =>
         val task = read[Task](r.responseText)
         tasks() = task +: API.tasks()
       }
     }
 
+    def update(task: Task) = {
+      val json = s"""{"txt": "${task.txt}", "done": ${task.done}}"""
+      val headers = Seq("Content-Type" -> "application/json")
+      task.id.map{ id =>
+        Ajax.post(Routes.Todos.update(id), json, headers = headers).map{ r =>
+          val pos = tasks().indexWhere(t => t.id == task.id)
+          tasks() = tasks().updated(pos, task)
+        }
+      }
+    }
   }
 
   val editing = Var[Option[Task]](None)
@@ -56,14 +68,6 @@ object ScalaJSTodo {
       Some(sequence)
     }
   }
-
-//  val tasks = Var(
-//    Seq(
-//      Task(Sequence.inc, "TodoMVC Task A", true),
-//      Task(Sequence.inc, "TodoMVC Task B", false),
-//      Task(Sequence.inc, "TodoMVC Task C", false)
-//    )
-//  )
 
   val filter = Var("All")
 
@@ -142,7 +146,7 @@ object ScalaJSTodo {
               `type` := "checkbox",
               cursor := "pointer",
               onchange := { () =>
-                API.tasks() = API.tasks().updated(API.tasks().indexOf(task), task.copy(done = !task.done))
+                API.update(task.copy(done = !task.done))
               },
               if (task.done) checked := true
             ),
@@ -155,7 +159,7 @@ object ScalaJSTodo {
           ),
           form(
             onsubmit := { () =>
-              API.tasks() = API.tasks().updated(API.tasks().indexOf(task), task.copy(txt = inputRef.value))
+              API.update(task.copy(txt = inputRef.value))
               editing() = None
               false
             },
