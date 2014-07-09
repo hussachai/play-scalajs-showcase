@@ -69,7 +69,7 @@ object ScalaJSTodo {
     }
 
     def clearCompletedTasks = {
-      Ajax.post(Routes.Todos.clear).map{ r =>
+      Ajax.postAsForm(Routes.Todos.clear).map{ r =>
         if(r.ok) API.tasks() = API.tasks().filter(!_.done)
       }
     }
@@ -138,7 +138,8 @@ object ScalaJSTodo {
     footer(id:="info")(
       p("Double-click to edit a todo"),
       p(a(href:="https://github.com/lihaoyi/workbench-example-app/blob/todomvc/src/main/scala/example/ScalaJSExample.scala")("Source Code")),
-      p("Created by ", a(href:="http://github.com/lihaoyi")("Li Haoyi"))
+      p("Created by ", a(href:="http://github.com/lihaoyi")("Li Haoyi")),
+      p(a(href:="https://github.com/hussachai/play-with-scalajs-example")("Modified version"))
     )
   }
 
