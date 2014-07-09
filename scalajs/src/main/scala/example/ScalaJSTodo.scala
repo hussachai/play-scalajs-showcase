@@ -7,7 +7,7 @@ import all._
 import tags2.section
 import rx._
 import scala.scalajs.js.annotation.JSExport
-import shared.Task
+import shared._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.Future
 
@@ -23,8 +23,10 @@ object ScalaJSTodo {
     import org.scalajs.jquery.{jQuery=>$}
     import upickle._
     import upickle.Implicits._
+    import common.ExtAjax._
 
     implicit val taskPickler = Case3ReadWriter(Task.apply, Task.unapply)
+    implicit val csrf = Csrf("")
 
     val tasks = Var(List.empty[Task])
 
@@ -40,21 +42,35 @@ object ScalaJSTodo {
 
     def create(txt: String, done: Boolean = false) = {
       val json = s"""{"txt": "${txt}", "done": ${done}}"""
-      val headers = Seq("Content-Type" -> "application/json")
-      Ajax.post(Routes.Todos.create, json, headers = headers).map{ r =>
-        val task = read[Task](r.responseText)
-        tasks() = task +: API.tasks()
+      Ajax.postAsJson(Routes.Todos.create, json).map{ r =>
+//        val task = read[Task](r.responseText)
+        tasks() = r.responseAs[Task] +: API.tasks()
       }
     }
 
     def update(task: Task) = {
       val json = s"""{"txt": "${task.txt}", "done": ${task.done}}"""
-      val headers = Seq("Content-Type" -> "application/json")
       task.id.map{ id =>
-        Ajax.post(Routes.Todos.update(id), json, headers = headers).map{ r =>
-          val pos = tasks().indexWhere(t => t.id == task.id)
-          tasks() = tasks().updated(pos, task)
+        Ajax.postAsJson(Routes.Todos.update(id), json).map{ r =>
+          if(r.ok){
+            val pos = tasks().indexWhere(t => t.id == task.id)
+            tasks() = tasks().updated(pos, task)
+          }
         }
+      }
+    }
+
+    def delete(idOp: Option[Long]) = {
+      idOp.map{ id =>
+        Ajax.delete(Routes.Todos.delete(id)).map{ r =>
+          if(r.ok) API.tasks() = API.tasks().filter(_.id != idOp)
+        }
+      }
+    }
+
+    def clearCompletedTasks = {
+      Ajax.post(Routes.Todos.clear).map{ r =>
+        if(r.ok) API.tasks() = API.tasks().filter(!_.done)
       }
     }
   }
@@ -154,7 +170,7 @@ object ScalaJSTodo {
             button(
               `class` := "destroy",
               cursor := "pointer",
-              onclick := { () =>API.tasks() = API.tasks().filter(_ != task) }
+              onclick := { () => API.delete(task.id) }
             )
           ),
           form(
@@ -188,7 +204,7 @@ object ScalaJSTodo {
       ),
       button(
         id:="clear-completed",
-        onclick := { () => API.tasks() = API.tasks().filter(!_.done) },
+        onclick := { () => API.clearCompletedTasks },
         "Clear completed (", done, ")"
       )
     )
