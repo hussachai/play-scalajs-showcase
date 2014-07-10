@@ -1,14 +1,13 @@
-package example
+package common
 
-import scala.collection.{SortedMap, mutable}
-import scalatags.JsDom._
-import scala.util.{Failure, Success, Random}
-import all._
-import rx._
-import rx.core.{Propagator, Obs}
 import org.scalajs.dom
-import org.scalajs.dom.{Element, DOMParser}
-import scala.scalajs.js
+import org.scalajs.dom.Element
+import rx._
+import rx.core.Obs
+
+import scala.util.{Failure, Success}
+import scalatags.JsDom._
+import scalatags.JsDom.all._
 
 
 /**

@@ -28,22 +28,18 @@ class ExtAjax(ajax: Ajax.type) {
            data: String = "",
            timeout: Int = 0,
            headers: Seq[(String, String)] = Nil,
-           withCredentials: Boolean = false)(implicit csrf: Csrf) = {
+           withCredentials: Boolean = false) = {
     val contentType = Seq("Content-Type"->"application/x-www-form-urlencoded")
-    val newHeaders = if(headers == Nil) contentType else contentType ++ headers
-    val newData = (if(data != "") data + "&") + s"csrfToken=${csrf}"
-    apply("POST", url, newData, timeout, newHeaders, withCredentials)
+    apply("POST", url, data, timeout, headers ++ contentType, withCredentials)
   }
 
   def postAsJson(url: String,
                  data: String = "",
                  timeout: Int = 0,
                  headers: Seq[(String, String)] = Nil,
-                 withCredentials: Boolean = false)(implicit csrf: Csrf) = {
+                 withCredentials: Boolean = false) = {
     val contentType = Seq("Content-Type"->"application/json")
-    val newHeaders = if(headers == Nil) contentType else contentType ++ headers
-    val newUrl = url + (if(url.contains("?")) "&" else "?") + s"csrfToken=${csrf}"
-    apply("POST", newUrl, data, timeout, newHeaders, withCredentials)
+    apply("POST", url, data, timeout, headers ++ contentType, withCredentials)
   }
 
   def apply(method: String,
@@ -53,8 +49,7 @@ class ExtAjax(ajax: Ajax.type) {
             headers: Seq[(String, String)] = Nil,
             withCredentials: Boolean = false) = {
     val ajaxReq = Seq("X-Requested-With"->"XMLHttpRequest")
-    val newHeaders = if(headers == Nil) ajaxReq else headers ++ ajaxReq
-    ajax.apply(method, url, data, timeout, newHeaders, withCredentials)
+    ajax.apply(method, url, data, timeout, headers ++ ajaxReq, withCredentials)
   }
 
 }

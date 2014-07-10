@@ -1,5 +1,6 @@
 package example
 
+import common.Framework
 import config.Routes
 import org.scalajs.dom
 import scalatags.JsDom._
@@ -26,7 +27,6 @@ object ScalaJSTodo {
     import common.ExtAjax._
 
     implicit val taskPickler = Case3ReadWriter(Task.apply, Task.unapply)
-    implicit val csrf = Csrf("")
 
     val tasks = Var(List.empty[Task])
 
@@ -43,7 +43,6 @@ object ScalaJSTodo {
     def create(txt: String, done: Boolean = false) = {
       val json = s"""{"txt": "${txt}", "done": ${done}}"""
       Ajax.postAsJson(Routes.Todos.create, json).map{ r =>
-//        val task = read[Task](r.responseText)
         tasks() = r.responseAs[Task] +: API.tasks()
       }
     }
@@ -76,14 +75,6 @@ object ScalaJSTodo {
   }
 
   val editing = Var[Option[Task]](None)
-
-  object Sequence {
-    var sequence = 0l
-    def inc = {
-      sequence = sequence + 1
-      Some(sequence)
-    }
-  }
 
   val filter = Var("All")
 
@@ -213,6 +204,7 @@ object ScalaJSTodo {
 
   @JSExport
   def main(): Unit = {
+
     dom.document.body.innerHTML = ""
     API.init.map { r =>
       dom.document.body.appendChild(
