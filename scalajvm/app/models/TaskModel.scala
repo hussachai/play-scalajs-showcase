@@ -56,6 +56,7 @@ object TaskSlickStore extends TaskStore {
   //import scala.slick.driver.H2Driver.simple._
   import play.api.db.slick._
 
+  //H2 always uses all upper case. That's annoying!!!
   class Tasks(tag: Tag) extends Table[Task](tag, "TASKS"){
     def id   = column[Option[Long]]("ID", O.PrimaryKey, O.AutoInc)
     def txt  = column[String]("TXT")
