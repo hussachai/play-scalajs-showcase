@@ -65,7 +65,7 @@ object ApplicationBuild extends Build with UniversalKeys {
     Seq(
       name := "shared-scala-example",
       scalaVersion := Versions.scala,
-      scalaSource in Compile := baseDirectory.value,
+      // scalaSource in Compile := baseDirectory.value,
       EclipseKeys.skipProject := true,
       libraryDependencies ++= Dependencies.shared
     )
@@ -94,6 +94,7 @@ object Dependencies {
   val shared = Seq()
 
   val scalajvm = Seq(
+    filters,
     jdbc,
     anorm,
     "com.typesafe.slick" %% "slick" % "2.1.0-M2",

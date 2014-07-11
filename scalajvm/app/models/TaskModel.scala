@@ -22,14 +22,15 @@ object TaskModel {
 
 trait TaskStore {
 
- def all: Future[List[Task]]
+  def all: Future[List[Task]]
 
- def create(txt: String, done: Boolean): Future[Task]
+  def create(txt: String, done: Boolean): Future[Task]
 
- def update(task: Task): Future[Boolean]
+  def update(task: Task): Future[Boolean]
 
- def delete(id: Long): Future[Boolean]
+  def delete(ids: Long*): Future[Boolean]
 
+  def clearCompletedTasks: Future[Int]
 }
 
 object TaskMemStore extends TaskStore {
@@ -45,7 +46,11 @@ object TaskMemStore extends TaskStore {
     ???
   }
 
-  override def delete(id: Long): Future[Boolean] = Future{
+  override def delete(ids: Long*): Future[Boolean] = Future{
+    ???
+  }
+
+  override def clearCompletedTasks: Future[Int] = Future{
     ???
   }
 }
@@ -85,9 +90,17 @@ object TaskSlickStore extends TaskStore {
     }
   }
 
-  override def delete(id: Long): Future[Boolean] = Future{
-    DB.withSession { implicit session =>
-      tasks.filter(_.id === id).delete == 1
+  override def delete(ids: Long*): Future[Boolean] = Future{
+    DB.withTransaction { implicit session =>
+      (for(id <- ids) yield {
+        tasks.filter(_.id === id).delete == 1
+      }).find(i=>i==false) == None
+    }
+  }
+
+  override def clearCompletedTasks: Future[Int] = Future{
+    DB.withSession{ implicit session =>
+      tasks.filter(_.done === true).delete
     }
   }
 }
@@ -121,10 +134,19 @@ object TaskAnormStore extends TaskStore{
     }
   }
 
-  override def delete(id: Long): Future[Boolean] = Future{
-    DB.withConnection { implicit c =>
+  override def delete(ids: Long*): Future[Boolean] = Future{
+    DB.withTransaction { implicit c =>
       val sql = "DELETE Tasks WHERE id = {id}"
-      SQL(sql).on('id -> id).executeUpdate() == 1
+      (for(id <- ids) yield {
+        SQL(sql).on('id -> id).executeUpdate() == 1
+      }).find(i=>i==false) == None
+    }
+  }
+
+  override def clearCompletedTasks: Future[Int] = Future{
+    DB.withConnection { implicit c =>
+      val sql = "DELETE Tasks WHERE done = true"
+      SQL(sql).executeUpdate()
     }
   }
 

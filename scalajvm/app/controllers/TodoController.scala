@@ -1,13 +1,13 @@
 package controllers
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json.{Json=>_, _}
+import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.mvc.{Result, Request, Action, Controller}
 import scala.concurrent.Future
 import models.TaskModel
-import upickle._
+import upickle.{Json=>_,_}
 import upickle.Implicits._
 import shared.Task
 
@@ -20,7 +20,7 @@ object TodoController extends Controller{
     (__ \ 'done).read[Boolean]
   ) tupled
 
-  def index = Action {
+  def index = Action { implicit request =>
     Ok(views.html.todo("TODO"))
   }
 
@@ -58,4 +58,17 @@ object TodoController extends Controller{
       e => Future(BadRequest)
     }
   }
+
+  def delete(id: Long) = Action.async{ implicit request =>
+    TaskModel.store.delete(id).map{ r =>
+      if(r) Ok else BadRequest
+    }.recover{ case e => InternalServerError}
+  }
+
+  def clear = Action.async{ implicit request =>
+    TaskModel.store.clearCompletedTasks.map{ r =>
+      Ok(write(r))
+    }.recover{ case e => InternalServerError}
+  }
+
 }

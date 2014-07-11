@@ -1,5 +1,6 @@
 package example
 
+import common.Framework
 import config.Routes
 import org.scalajs.dom
 import scalatags.JsDom._
@@ -7,7 +8,7 @@ import all._
 import tags2.section
 import rx._
 import scala.scalajs.js.annotation.JSExport
-import shared.Task
+import shared._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.concurrent.Future
 
@@ -23,6 +24,7 @@ object ScalaJSTodo {
     import org.scalajs.jquery.{jQuery=>$}
     import upickle._
     import upickle.Implicits._
+    import common.ExtAjax._
 
     implicit val taskPickler = Case3ReadWriter(Task.apply, Task.unapply)
 
@@ -40,34 +42,39 @@ object ScalaJSTodo {
 
     def create(txt: String, done: Boolean = false) = {
       val json = s"""{"txt": "${txt}", "done": ${done}}"""
-      val headers = Seq("Content-Type" -> "application/json")
-      Ajax.post(Routes.Todos.create, json, headers = headers).map{ r =>
-        val task = read[Task](r.responseText)
-        tasks() = task +: API.tasks()
+      Ajax.postAsJson(Routes.Todos.create, json).map{ r =>
+        tasks() = r.responseAs[Task] +: API.tasks()
       }
     }
 
     def update(task: Task) = {
       val json = s"""{"txt": "${task.txt}", "done": ${task.done}}"""
-      val headers = Seq("Content-Type" -> "application/json")
       task.id.map{ id =>
-        Ajax.post(Routes.Todos.update(id), json, headers = headers).map{ r =>
-          val pos = tasks().indexWhere(t => t.id == task.id)
-          tasks() = tasks().updated(pos, task)
+        Ajax.postAsJson(Routes.Todos.update(id), json).map{ r =>
+          if(r.ok){
+            val pos = tasks().indexWhere(t => t.id == task.id)
+            tasks() = tasks().updated(pos, task)
+          }
         }
+      }
+    }
+
+    def delete(idOp: Option[Long]) = {
+      idOp.map{ id =>
+        Ajax.delete(Routes.Todos.delete(id)).map{ r =>
+          if(r.ok) API.tasks() = API.tasks().filter(_.id != idOp)
+        }
+      }
+    }
+
+    def clearCompletedTasks = {
+      Ajax.postAsForm(Routes.Todos.clear).map{ r =>
+        if(r.ok) API.tasks() = API.tasks().filter(!_.done)
       }
     }
   }
 
   val editing = Var[Option[Task]](None)
-
-  object Sequence {
-    var sequence = 0l
-    def inc = {
-      sequence = sequence + 1
-      Some(sequence)
-    }
-  }
 
   val filter = Var("All")
 
@@ -122,7 +129,8 @@ object ScalaJSTodo {
     footer(id:="info")(
       p("Double-click to edit a todo"),
       p(a(href:="https://github.com/lihaoyi/workbench-example-app/blob/todomvc/src/main/scala/example/ScalaJSExample.scala")("Source Code")),
-      p("Created by ", a(href:="http://github.com/lihaoyi")("Li Haoyi"))
+      p("Created by ", a(href:="http://github.com/lihaoyi")("Li Haoyi")),
+      p(a(href:="https://github.com/hussachai/play-with-scalajs-example")("Modified version"))
     )
   }
 
@@ -154,7 +162,7 @@ object ScalaJSTodo {
             button(
               `class` := "destroy",
               cursor := "pointer",
-              onclick := { () =>API.tasks() = API.tasks().filter(_ != task) }
+              onclick := { () => API.delete(task.id) }
             )
           ),
           form(
@@ -188,7 +196,7 @@ object ScalaJSTodo {
       ),
       button(
         id:="clear-completed",
-        onclick := { () => API.tasks() = API.tasks().filter(!_.done) },
+        onclick := { () => API.clearCompletedTasks },
         "Clear completed (", done, ")"
       )
     )
@@ -196,6 +204,7 @@ object ScalaJSTodo {
 
   @JSExport
   def main(): Unit = {
+
     dom.document.body.innerHTML = ""
     API.init.map { r =>
       dom.document.body.appendChild(

@@ -1,8 +1,9 @@
-@(message: String)
+@(message: String)(implicit token: play.filters.csrf.CSRF.Token)
 
 @header = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/todo.css")">
 }
 @main("Play with Scala.js", header){
+
     <script>ScalaJSTodo().main()</script>
 }
