@@ -17,7 +17,7 @@ import scala.concurrent.Future
 object ScalaJSTodo {
   import Framework._
 
-  object API {
+  object Model {
     import scala.scalajs.js
     import js.Dynamic.{global => g}
     import org.scalajs.dom.extensions.Ajax
@@ -29,6 +29,20 @@ object ScalaJSTodo {
     implicit val taskPickler = Case3ReadWriter(Task.apply, Task.unapply)
 
     val tasks = Var(List.empty[Task])
+
+    val done = Rx{ tasks().count(_.done)}
+
+    val notDone = Rx{ tasks().length - done()}
+
+    val editing = Var[Option[Task]](None)
+
+    val filter = Var("All")
+
+    val filters = Map[String, Task => Boolean](
+      ("All", t => true),
+      ("Active", !_.done),
+      ("Completed", _.done)
+    )
 
     def init: Future[Unit] = {
       Ajax.get(Routes.Todos.all).map { r =>
@@ -43,7 +57,7 @@ object ScalaJSTodo {
     def create(txt: String, done: Boolean = false) = {
       val json = s"""{"txt": "${txt}", "done": ${done}}"""
       Ajax.postAsJson(Routes.Todos.create, json).map{ r =>
-        tasks() = r.responseAs[Task] +: API.tasks()
+        tasks() = r.responseAs[Task] +: tasks()
       }
     }
 
@@ -62,31 +76,17 @@ object ScalaJSTodo {
     def delete(idOp: Option[Long]) = {
       idOp.map{ id =>
         Ajax.delete(Routes.Todos.delete(id)).map{ r =>
-          if(r.ok) API.tasks() = API.tasks().filter(_.id != idOp)
+          if(r.ok) tasks() = tasks().filter(_.id != idOp)
         }
       }
     }
 
     def clearCompletedTasks = {
       Ajax.postAsForm(Routes.Todos.clear).map{ r =>
-        if(r.ok) API.tasks() = API.tasks().filter(!_.done)
+        if(r.ok) tasks() = tasks().filter(!_.done)
       }
     }
   }
-
-  val editing = Var[Option[Task]](None)
-
-  val filter = Var("All")
-
-  val filters = Map[String, Task => Boolean](
-    ("All", t => true),
-    ("Active", !_.done),
-    ("Completed", _.done)
-  )
-
-  val done = Rx{ API.tasks().count(_.done)}
-
-  val notDone = Rx{ API.tasks().length - done()}
 
   val inputBox = input(
     id:="new-todo",
@@ -100,7 +100,7 @@ object ScalaJSTodo {
       form(
         inputBox,
         onsubmit := { () =>
-          API.create(inputBox.value)
+          Model.create(inputBox.value)
           inputBox.value = ""
           false
         }
@@ -115,7 +115,7 @@ object ScalaJSTodo {
         `type`:="checkbox",
         cursor:="pointer",
         onclick := { () =>
-          val target = API.tasks().exists(_.done == false)
+          val target = Model.tasks().exists(_.done == false)
 //          Var.set(tasks().map(_.done -> target): _*)
         }
       ),
@@ -136,25 +136,25 @@ object ScalaJSTodo {
 
   def renderList = Rx {
     ul(id := "todo-list")(
-      for (task <- API.tasks() if filters(filter())(task)) yield {
+      for (task <- Model.tasks() if Model.filters(Model.filter())(task)) yield {
         val inputRef = input(`class` := "edit", value := task.txt).render
 
         li(
           `class` := Rx{
             if (task.done) "completed"
-            else if (editing() == Some(task)) "editing"
+            else if (Model.editing() == Some(task)) "editing"
             else ""
           },
           div(`class` := "view")(
             "ondblclick".attr := { () =>
-              editing() = Some(task)
+              Model.editing() = Some(task)
             },
             input(
               `class` := "toggle",
               `type` := "checkbox",
               cursor := "pointer",
               onchange := { () =>
-                API.update(task.copy(done = !task.done))
+                Model.update(task.copy(done = !task.done))
               },
               if (task.done) checked := true
             ),
@@ -162,13 +162,13 @@ object ScalaJSTodo {
             button(
               `class` := "destroy",
               cursor := "pointer",
-              onclick := { () => API.delete(task.id) }
+              onclick := { () => Model.delete(task.id) }
             )
           ),
           form(
             onsubmit := { () =>
-              API.update(task.copy(txt = inputRef.value))
-              editing() = None
+              Model.update(task.copy(txt = inputRef.value))
+              Model.editing() = None
               false
             },
             inputRef
@@ -180,24 +180,24 @@ object ScalaJSTodo {
 
   def renderControls = {
     footer(id:="footer")(
-      span(id:="todo-count")(strong(notDone), " item left"),
+      span(id:="todo-count")(strong(Model.notDone), " item left"),
       ul(id:="filters")(
-        for ((name, pred) <- filters.toSeq) yield {
+        for ((name, pred) <- Model.filters.toSeq) yield {
           li(a(
             `class`:=Rx{
-              if(name == filter()) "selected"
+              if(name == Model.filter()) "selected"
               else ""
             },
             name,
             href:="#",
-            onclick := {() => filter() = name}
+            onclick := {() => Model.filter() = name}
           ))
         }
       ),
       button(
         id:="clear-completed",
-        onclick := { () => API.clearCompletedTasks },
-        "Clear completed (", done, ")"
+        onclick := { () => Model.clearCompletedTasks },
+        "Clear completed (", Model.done, ")"
       )
     )
   }
@@ -206,7 +206,7 @@ object ScalaJSTodo {
   def main(): Unit = {
 
     dom.document.body.innerHTML = ""
-    API.init.map { r =>
+    Model.init.map { r =>
       dom.document.body.appendChild(
         section(id:="todoapp")(
           renderHead,

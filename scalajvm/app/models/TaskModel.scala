@@ -12,6 +12,7 @@ object TaskModel {
     case Some(impl) => impl match {
       case "Anorm" => TaskAnormStore
       case "Slick" => TaskSlickStore
+      case _ => TaskMemStore
     }
     case None => TaskMemStore
   }
@@ -34,24 +35,52 @@ trait TaskStore {
 }
 
 object TaskMemStore extends TaskStore {
+
+  import scala.collection.mutable.{Map=>MutableMap}
+
+  val store = MutableMap.empty[Long, Task]
+  store += (1L -> Task(Some(1L), "Upgrade Scala JS", true),
+    2L -> Task(Some(2L), "Make it Rx", false),
+    3L -> Task(Some(3L), "Make this example useful", false))
+
+  var seq: Long = store.size
+
+  def sequence() = {
+    seq = seq + 1
+    seq
+  }
+
   override def all(): Future[List[Task]] = Future{
-    ???
+    store.values.toList.sortBy(- _.id.get)
   }
 
   override def create(txt: String, done: Boolean): Future[Task] = Future{
-    ???
+    val task = Task(Some(sequence()), txt, done)
+    store += (task.id.get -> task)
+    task
   }
 
   override def update(task: Task): Future[Boolean] = Future{
-    ???
+    task.id.map{ id =>
+      store += (id -> task)
+      true
+    }.getOrElse(false)
   }
 
   override def delete(ids: Long*): Future[Boolean] = Future{
-    ???
+    ids.foreach{ id =>
+      store.remove(id)
+    }
+    true
   }
 
   override def clearCompletedTasks: Future[Int] = Future{
-    ???
+    store.values.foldLeft[Int](0){ case (c, task) =>
+      if(task.done) {
+        store -= task.id.get
+        c + 1
+      }else c
+    }
   }
 }
 
