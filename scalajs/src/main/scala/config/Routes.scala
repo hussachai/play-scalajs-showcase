@@ -10,4 +10,12 @@ object Routes {
     def delete(id: Long) = base + s"/delete/$id"
     def clear = base + "/clear"
   }
+
+  object Hangman {
+    val base = "/hangman"
+    def start(level: Int) = base + s"/start/$level"
+    def session = base + "/session"
+    def guess(g: Char) = base + s"/guess/$g"
+    def giveup = base + "/giveup"
+  }
 }

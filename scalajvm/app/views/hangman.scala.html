@@ -1,5 +1,9 @@
-@(message: String)
-
+@(hangman: Option[shared.Hangman])
+@*
+TODO: Find the way to pass object to javascript
+*@
 @main("Hangman"){
-    <script>ScalaJSHangman().main()</script>
+    <script>
+        ScalaJSHangman().main ()
+    </script>
 }

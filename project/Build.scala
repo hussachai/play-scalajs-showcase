@@ -31,13 +31,14 @@ object ApplicationBuild extends Build with UniversalKeys {
   lazy val sharedScala = Project(
     id = "scala",
     base = file(sharedSrcDir)
-  ) settings (sharedScalaSettings: _*)
+  ) settings (sharedScalaSettings: _*) 
 
   lazy val scalajvmSettings =
     Seq(
       name := "play-example",
       version := Versions.app,
       scalaVersion := Versions.scala,
+      routesImport += "controllers._",
       scalajsOutputDir := (crossTarget in Compile).value / "classes" / "public" / "javascripts",
       compile in Compile <<= (compile in Compile) dependsOn (fastOptJS in (scalajs, Compile)),
       dist <<= dist dependsOn (fullOptJS in (scalajs, Compile)),
@@ -65,7 +66,7 @@ object ApplicationBuild extends Build with UniversalKeys {
     Seq(
       name := "shared-scala-example",
       scalaVersion := Versions.scala,
-      // scalaSource in Compile := baseDirectory.value,
+      //scalaSource in Compile := baseDirectory.value,
       EclipseKeys.skipProject := true,
       libraryDependencies ++= Dependencies.shared
     )
