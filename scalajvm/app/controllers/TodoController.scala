@@ -1,10 +1,11 @@
 package controllers
 
+import models.TaskMemStore.InsufficientStorageException
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
-import play.api.mvc.{Result, Request, Action, Controller}
+import play.api.mvc._
 import scala.concurrent.Future
 import models.TaskModel
 import upickle.{Json=>_,_}
@@ -36,7 +37,10 @@ object TodoController extends Controller{
     val fn = (txt: String, done: Boolean) =>
       TaskModel.store.create(txt, done).map{ r =>
         Ok(write(r))
-      }.recover{ case e => InternalServerError}
+      }.recover{
+        case e: InsufficientStorageException => InsufficientStorage(e)
+        case e: Throwable => InternalServerError(e)
+      }
     executeRequest(fn)
   }
 
@@ -44,7 +48,7 @@ object TodoController extends Controller{
     val fn = (txt: String, done: Boolean) =>
       TaskModel.store.update(Task(Some(id), txt, done)).map{ r =>
         if(r) Ok else BadRequest
-      }.recover{ case e => InternalServerError}
+      }.recover{ case e => InternalServerError(e)}
     executeRequest(fn)
   }
 
@@ -55,20 +59,20 @@ object TodoController extends Controller{
         fn(txt, done)
       }
     }.recoverTotal{
-      e => Future(BadRequest)
+      e => Future(BadRequest(e))
     }
   }
 
   def delete(id: Long) = Action.async{ implicit request =>
     TaskModel.store.delete(id).map{ r =>
       if(r) Ok else BadRequest
-    }.recover{ case e => InternalServerError}
+    }.recover{ case e => InternalServerError(e)}
   }
 
   def clear = Action.async{ implicit request =>
     TaskModel.store.clearCompletedTasks.map{ r =>
       Ok(write(r))
-    }.recover{ case e => InternalServerError}
+    }.recover{ case e => InternalServerError(e)}
   }
 
 }

@@ -3,6 +3,7 @@ package example
 import common.Framework
 import config.Routes
 import org.scalajs.dom
+import org.scalajs.dom.extensions.AjaxException
 import scalatags.JsDom._
 import all._
 import tags2.section
@@ -58,7 +59,7 @@ object ScalaJSTodo {
       val json = s"""{"txt": "${txt}", "done": ${done}}"""
       Ajax.postAsJson(Routes.Todos.create, json).map{ r =>
         tasks() = r.responseAs[Task] +: tasks()
-      }
+      }.recover{case e: AjaxException => dom.alert(e.xhr.responseText)}
     }
 
     def update(task: Task) = {
@@ -86,6 +87,7 @@ object ScalaJSTodo {
         if(r.ok) tasks() = tasks().filter(!_.done)
       }
     }
+
   }
 
   val inputBox = input(
@@ -94,7 +96,7 @@ object ScalaJSTodo {
     autofocus:=true
   ).render
 
-  def renderHead = {
+  def templateHeader = {
     header(id:="header")(
       h1("todos"),
       form(
@@ -108,7 +110,7 @@ object ScalaJSTodo {
     )
   }
 
-  def renderBody = {
+  def templateBody = {
     section(id:="main")(
       input(
         id:="toggle-all",
@@ -120,12 +122,12 @@ object ScalaJSTodo {
         }
       ),
       label(`for`:="toggle-all", "Mark all as complete"),
-      renderList,
-      renderControls
+      partList,
+      partControls
     )
   }
 
-  def renderFooter = {
+  def templateFooter = {
     footer(id:="info")(
       p("Double-click to edit a todo"),
       p(a(href:="https://github.com/lihaoyi/workbench-example-app/blob/todomvc/src/main/scala/example/ScalaJSExample.scala")("Source Code")),
@@ -134,7 +136,7 @@ object ScalaJSTodo {
     )
   }
 
-  def renderList = Rx {
+  def partList = Rx {
     ul(id := "todo-list")(
       for (task <- Model.tasks() if Model.filters(Model.filter())(task)) yield {
         val inputRef = input(`class` := "edit", value := task.txt).render
@@ -178,7 +180,7 @@ object ScalaJSTodo {
     )
   }
 
-  def renderControls = {
+  def partControls = {
     footer(id:="footer")(
       span(id:="todo-count")(strong(Model.notDone), " item left"),
       ul(id:="filters")(
@@ -209,9 +211,9 @@ object ScalaJSTodo {
     Model.init.map { r =>
       dom.document.body.appendChild(
         section(id:="todoapp")(
-          renderHead,
-          renderBody,
-          renderFooter
+          templateHeader,
+          templateBody,
+          templateFooter
         ).render
       )
     }

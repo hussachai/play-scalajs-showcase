@@ -38,6 +38,9 @@ object TaskMemStore extends TaskStore {
 
   import scala.collection.mutable.{Map=>MutableMap}
 
+  class InsufficientStorageException(m: String) extends Exception(m)
+
+  val maxSize = 5
   val store = MutableMap.empty[Long, Task]
   store += (1L -> Task(Some(1L), "Upgrade Scala JS", true),
     2L -> Task(Some(2L), "Make it Rx", false),
@@ -55,6 +58,7 @@ object TaskMemStore extends TaskStore {
   }
 
   override def create(txt: String, done: Boolean): Future[Task] = Future{
+    if(store.size >= maxSize) throw new InsufficientStorageException("quota exceed for demo:"+maxSize)
     val task = Task(Some(sequence()), txt, done)
     store += (task.id.get -> task)
     task
