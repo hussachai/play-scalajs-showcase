@@ -1,5 +1,5 @@
 @(title: String, header: Html = Html(""))(content: Html)
-
+@import play.api.Play
 <!DOCTYPE html>
 
 <html>
@@ -11,9 +11,12 @@
     @header
   </head>
   <body>
-    <script src="@routes.Assets.at("javascripts/scalajs-example-fastopt.js")" type="text/javascript"></script>
-    <!-- for production (play dist), use the optimized version instead -->
-    <!-- <script src="@routes.Assets.at("javascripts/scalajs-example-opt.js")" type="text/javascript"></script> -->
+    @if(Play.isDev(Play.current)) {
+        <script src="@routes.Assets.at("javascripts/scalajs-example-fastopt.js")" type="text/javascript"></script>
+    }else {
+        <!-- for production (play dist), use the optimized version instead -->
+        <script src="@routes.Assets.at("javascripts/scalajs-example-opt.js")" type="text/javascript"></script>
+    }
     @content
   </body>
 </html>

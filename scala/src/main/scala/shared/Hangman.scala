@@ -20,7 +20,9 @@ case class Hangman(
   }
 
   def won = {
-    guess.mkString("") == word
+    (for(c <- word.toCharArray) yield {
+      guess.contains(c)
+    }).find(i=>i==false) == None
   }
 }
 
