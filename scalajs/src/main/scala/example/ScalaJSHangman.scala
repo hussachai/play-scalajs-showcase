@@ -44,10 +44,19 @@ object ScalaJSHangman {
       }.recover{case e => callback(false)}
     }
 
-    def guess(g: Char)(callback: ()=>Unit) = {
+    def guess(g: Char)(callback: () => Unit) = {
       Ajax.postAsForm(Routes.Hangman.guess(g)).map{ r =>
         if(r.ok){
           Model.game() = r.responseAs[Hangman]
+          callback()
+        }
+      }
+    }
+
+    def giveup(callback: () => Unit) = {
+      Ajax.postAsForm(Routes.Hangman.giveup).map{ r =>
+        if(r.ok){
+          Model.level() = 0
           callback()
         }
       }
@@ -76,8 +85,8 @@ object ScalaJSHangman {
               })
             }
           ),
-          input(`type` := "button", value := "Back!", onclick := { () =>
-            goto(pagePlay)
+          a("Give up?", href := "javascript:void(0);", onclick := { () =>
+            Model.giveup{ () => goto(pagePlay) }
           })
         )
       }

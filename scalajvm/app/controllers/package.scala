@@ -2,9 +2,13 @@ package controllers
 
 import play.api.http.{Writeable, ContentTypes, ContentTypeOf}
 import play.api.libs.json.JsError
-import play.api.mvc.Codec
+import play.api.mvc.{Request, Codec}
 
 object `package` {
+
+  def isAjax[A](implicit request : Request[A]) = {
+    request.headers.get("X-Requested-With") == Some("XMLHttpRequest")
+  }
 
   implicit def contentTypeOf_Throwable(implicit codec: Codec): ContentTypeOf[Throwable] =
     ContentTypeOf[Throwable](Some(ContentTypes.TEXT))

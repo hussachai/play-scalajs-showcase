@@ -47,7 +47,8 @@ object HangmanController extends Controller{
   }
 
   def giveup = Action { implicit request =>
-    Redirect(routes.HangmanController.index()).withSession(request.session - sessionName)
+    (if(isAjax) Ok else Redirect(routes.HangmanController.index()))
+      .withSession(request.session - sessionName)
   }
 
   private def writeSession(value: String)(implicit request: RequestHeader) = {
