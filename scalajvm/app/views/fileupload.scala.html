@@ -1,6 +1,41 @@
 @(csrfToken: shared.Csrf)
 @main("File Upload"){
+    <script src="@routes.Assets.at("javascripts/filedrop.js")" type="text/javascript"></script>
+
     <script>
-        ScalaJSFileUpload().main ("@{csrfToken}")
+        //ScalaJSFileUpload().main ("@{csrfToken}")
+    </script>
+
+    <div id="zone7">
+        <iframe name="wrapFrame" src="javascript:false"
+        id="wrapFrame" style="display: none"></iframe>
+
+        <form enctype="multipart/form-data" method="post" target="wrapFrame">
+            <input type="hidden" name="fd-callback">
+            <input type="file" name="fd-file" class="fd-file">
+
+            <p>
+                <input type="checkbox" id="zone7_option" name="zone7_option">
+                <label for="zone7_option">Toggle me!</label>
+            </p>
+        </form>
+
+        <p class="legend">Drop a file inside...</p>
+    </div>
+
+    <script>
+    var options = {iframe: {url: 'upload.php'}}
+    var zone = new FileDrop('zone7', options)
+
+    zone.event('send', function (files) {
+    files.each(function (file) {
+    file.event('done', function (xhr) {
+    alert(xhr.responseText)
+    })
+
+    var value = fd.byID('zone7_option').checked ? '1' : '0'
+    file.sendTo('/upload')
+    })
+    })
     </script>
 }

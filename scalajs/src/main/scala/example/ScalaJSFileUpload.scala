@@ -1,13 +1,12 @@
 package example
 
 import org.scalajs.dom
-import org.scalajs.dom.FileReader
+import org.scalajs.dom.{XMLHttpRequest, FileList, FileReader}
 import shared.Csrf
 import scala.scalajs.js
-import scala.scalajs.js.Any
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import js.Dynamic.{global => g, _}
+import js.Dynamic.{global => g}
 import scalatags.JsDom._
 import all._
 import org.scalajs.jquery.{jQuery=>$,_}
@@ -16,174 +15,93 @@ import org.scalajs.jquery.{jQuery=>$,_}
 object ScalaJSFileUpload {
 
   def markup(csrfToken: String) = div(
-    h1("HTML5 File Drag &amp; Drop API"),
-    p("""This is a demonstration of the HTML5 file drag &amp; drop API with asynchronous Ajax file uploads,
-      graphical progress bars and progressive enhancement."""),
-    form(id:= "upload", action:=s"/upload",
-      target:="", "method".attr:="POST", "enctype".attr:="multipart/form-data"){
-      fieldset (
-        legend("HTML File Upload"),
-        input(`type`:="hidden", name:="csrfToken", value:=csrfToken),
-        div (
-          label(`for` := "", "Files to upload:"),
-          input(`type` := "file", id := "fileSelect", name := "fileSelect", "multiple".attr := "multiple"),
-          div(id := "fileDrag", backgroundColor:= "green")("or drop files here")
-        ),
-        div(id := "submitButton") (
-          button(`type` := "submit")("Upload Files")
-        )
-      )
-    },
-    div(id:="progress"),
-    div(id:="messages")(p("Status Messages")),
-    br,
-    h2("Disclaimer"),
-    p("The original code was developed by ", a(href:="http://twitter.com/craigbuckler", "Craig Buckler"), " of ",
-      a(href:="http://optimalworks.net/", "OptimalWorks.net"), " for ",
-      a(href:="http://sitepoint.com/", "SitePoint.com"), ".")
+    h2(style:="text-align: center")(a(href:="http://filedropjs.org", "FileDrop"), " basic sample"),
+    fieldset(id:="zone")(
+      legend("Drop a file inside ..."),
+      p("Or click here to ", em("Browse"), "..."),
+      p(style:="z-index:10;position:relative")(
+        input(`type`:="checkbox", id:="mulitple"),
+        label(`for`:="multiple")("Allow multiple selection")
+      ),
+      input(id:="hello", value:="Hello World")
+    )
   )
 
-  trait NodeExt extends dom.Node {
-    var style: js.Dynamic = ???
-    var action: String = ???
+  trait ElementExt extends dom.Element {
+    val checked: String = ???
   }
-  trait EventTargetExt extends dom.EventTarget {
-    var files: dom.FileList = ???
-    var className: String = ???
-    var result: js.Any = ???
-
+  trait FileExt extends dom.File {
+    def event(name: String, fn: js.Function1[XMLHttpRequest, _]) = ???
+    def sendTo(url: String)
   }
-  trait EventExt extends dom.Event {
-    var dataTransfer: dom.DataTransfer = ???
-
-    var loaded: Long = ???
-    var total: Long = ???
-  }
-  trait FileReaderExt extends dom.FileReader {
-    var onload: js.Function1[dom.Event, _] = ???
-  }
+  implicit def monkeyizeFile(e: dom.File): FileExt = e.asInstanceOf[FileExt]
+  implicit def monkeyizeElement(e: dom.Element): ElementExt = e.asInstanceOf[ElementExt]
 
   def scripts = {
-    implicit def monkeyizeNode(e: dom.Node): NodeExt = e.asInstanceOf[NodeExt]
-    implicit def monkeyizeEventTarget(e: dom.EventTarget): EventTargetExt = e.asInstanceOf[EventTargetExt]
-    implicit def monkeyizeEvent(e: dom.Event): EventExt = e.asInstanceOf[EventExt]
-    implicit def monkeyizeFileReader(e: dom.FileReader): FileReaderExt = e.asInstanceOf[FileReaderExt]
-
-    val maxFileSize = 3000000l
-
-    def $id(s: String) = dom.document.getElementById(s)
-
-    def output(msg: String) = {
-      val m = $id("messages")
-      m.innerHTML = msg + m.innerHTML
-    }
-
-    def fileDragHover(e: dom.Event) = {
-      e.stopPropagation()
-      e.preventDefault()
-      e.target.className = if(e.`type` == "dragover") "hover" else ""
-    }
-
-    def fileSelectHandler(e: dom.Event) = {
-      fileDragHover(e)
-      dom.alert(e.target.files.toString)
-      val files = if(e.target.files.toString != "undefined") e.target.files else {
-        dom.alert(e.dataTransfer.toString)
-        e.dataTransfer.files
-      }
-//      dom.alert((files != null).toString)
+    val options = js.Dynamic.literal("iframe"->js.Dynamic.literal("url"->"/upload"))
+    val zone = js.Dynamic.newInstance(js.Dynamic.global.FileDrop)("zone", options)
+    zone.event("send", (files: FileList) => {
       (0 until files.length).foreach{ i =>
-//        dom.alert(files(i).toString)
-        try {
-          parseFile(files(i))
-          uploadFile(files(i))
-        }catch{
-          case e:Throwable => dom.console.log(e.toString)
-        }
+        val file = files(i)
+        dom.alert(file.name)
+//        file.event("done", (xhr: XMLHttpRequest) => {
+//          dom.alert(s"Done uploading ${file.name}, response:\n\n ${xhr.responseText}")
+//        })
+        file.sendTo("/upload")
       }
-    }
-
-    def parseFile(file: dom.File) = {
-      output(
-        s"""
-          |<p>File information: <strong>${file.name}</strong>
-          | type: <strong>${file.`type`}</strong>
-          | size: <strong>${file.size}</strong> bytes</p>
-        """.stripMargin)
-      val reader = new FileReader{}
-      if(file.`type`.indexOf("image") == 0) {
-        reader.onload = (e: dom.Event) => {
-          output(
-            s"""
-              |<p><strong>${file.name}:</strong><br />
-              |<img src=""/>${e.target.result}</p>
-            """.stripMargin)
-        }
-        reader.readAsDataURL(file)
-      }else if(file.`type`.indexOf("text") == 0){
-        reader.onload = (e: dom.Event) => {
-          output(
-            s"""
-              |<p><strong>${file.name}:</strong></p>
-              |<pre>${e.target.result}</pre>
-            """.stripMargin)
-          reader.readAsText(file)
-        }
-      }
-    }
-
-    def uploadFile(file: dom.File) = {
-      val xhr = new dom.XMLHttpRequest
-      if(xhr.upload != null && file.size <= maxFileSize){
-        val o = $id("progress")
-        val progress = o.appendChild(dom.document.createElement("p"))
-        progress.appendChild(dom.document.createTextNode(s"upload ${file.name}"))
-
-        xhr.upload.addEventListener("progress", (e: dom.Event) => {
-          val pc = 100 - (e.loaded / e.total * 100)
-          progress.style.backgroundPosition = s"$pc % 0"
-        }, false)
-
-        xhr.onreadystatechange = (e: dom.Event) => {
-          if(xhr.readyState == 4){
-            progress.className = if(xhr.status == 200) "success" else "failure"
-          }
-        }
-        //start upload
-        xhr.open("POST", $id("upload").action, true)
-        xhr.setRequestHeader("X-Request-With", "XMLHttpRequest")
-        xhr.setRequestHeader("X_FILENAME", file.name)
-        xhr.send(file)
-      }
-    }
-
-    def init = {
-
-      $("#fileDrag").on("dragenter dragstart dragend dragleave dragover drag drop", (e: dom.Event) => {
-        e.preventDefault();
-      });
-
-      $id("fileSelect").addEventListener("change", fileSelectHandler _, false)
-      $id("fileSelect").ondragend
-      val xhr = new dom.XMLHttpRequest
-      if(xhr.upload != null){
-        val fileDrag = $id("fileDrag")
-        fileDrag.addEventListener("dragover", fileDragHover _, false)
-        fileDrag.addEventListener("dragleave", fileDragHover _, false)
-        fileDrag.addEventListener("drop", fileSelectHandler _, false)
-        fileDrag.style.display = "block"
-
-        $id("submitButton").style.display = "none"
-      }
-    }
-
-    init
+    })
+    // React on successful iframe fallback upload (this is separate mechanism
+    // from proper AJAX upload hence another handler):
+    zone.event("iframeDone", (xhr: XMLHttpRequest) => {
+      dom.alert(s"Done uploading via <iframe>, response: \n\n ${xhr.responseText}")
+    })
+    // A bit of sugar - toggling multiple selection:
+    g.fd.addEvent(g.fd.byID("multiple"), "change", (e: dom.Event) =>{
+      val m = ((e.currentTarget.toString != "undefined") || e.srcElement.checked == "checked")
+      zone.multiple(m)
+    })
   }
 
   @JSExport
   def main(csrfToken: String) = {
     dom.document.body.innerHTML = ""
+    script(src:="")
     dom.document.body.appendChild(markup(csrfToken).render)
     scripts
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

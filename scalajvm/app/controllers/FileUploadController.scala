@@ -3,6 +3,10 @@ package controllers
 import play.api.mvc.{Action, Controller}
 import play.filters.csrf.CSRFAddToken
 import shared.Csrf
+import play.api.Play
+import play.api.Play.current
+import java.io.File
+import java.util.UUID
 
 object FileUploadController extends Controller {
 
@@ -13,22 +17,17 @@ object FileUploadController extends Controller {
   }}
 
   def upload = Action(parse.multipartFormData) { request =>
-    println("WTF1")
-    println(request.body.files)
-    println("WTF2")
-    request.body.file("fileSelect").map { file =>
-      import java.io.File
-      val filename = file.filename
-      val contentType = file.contentType
-//      picture.ref.moveTo(new File("/tmp/picture"))
-      println(s"filename: $filename")
-      Ok("File uploaded")
-    }.getOrElse {
-//      Redirect(routes.Application.index).flashing(
-//        "error" -> "Missing file"
-//      )
-      BadRequest("Missing file")
+    println("FUCK")
+    val upload = Play.getFile("upload").getAbsolutePath + File.separatorChar
+
+    request.body.files.foreach{ file =>
+      val extPos = file.filename.lastIndexOf(".")
+      val ext = if(extPos != -1) file.filename.substring(extPos) else ""
+      file.ref.moveTo(new File(upload+UUID.randomUUID.toString+ext), false)
     }
+
+    Ok("File uploaded")
+
   }
 
 }
