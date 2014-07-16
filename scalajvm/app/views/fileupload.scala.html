@@ -1,6 +1,6 @@
-
+@(csrfToken: shared.Csrf)
 @main("File Upload"){
     <script>
-        ScalaJSFileUpload().main ()
+        ScalaJSFileUpload().main ("@{csrfToken}")
     </script>
 }
