@@ -53,21 +53,14 @@ object ScalaJSFileUpload {
   trait EventExt extends dom.Event {
     var dataTransfer: dom.DataTransfer = ???
 
-    var loaded: Long = ???
-    var total: Long = ???
+    var loaded: Int = ???
+    var total: Int = ???
   }
   trait FileReaderExt extends dom.FileReader {
     var onload: js.Function1[dom.Event, _] = ???
   }
 
-  class FileReader() extends dom.EventTarget {
 
-    var onload: js.Function1[dom.Event, _] = ???
-
-    def readAsDataURL(blob: dom.Blob): Unit = ???
-    def readAsText(blob: dom.Blob): Unit = ???
-
-  }
   def scripts = {
     implicit def monkeyizeEventTarget(e: dom.EventTarget): EventTargetExt = e.asInstanceOf[EventTargetExt]
     implicit def monkeyizeEvent(e: dom.Event): EventExt = e.asInstanceOf[EventExt]
@@ -96,8 +89,8 @@ object ScalaJSFileUpload {
         e.asInstanceOf[dom.DragEvent].dataTransfer.files
 //        e.dataTransfer.files
       }
-      dom.alert(files.toString)
-      dom.alert((files != null).toString)
+//      dom.alert(files.toString)
+//      dom.alert((files != null).toString)
       (0 until files.length).foreach{ i =>
 //        dom.alert(files(i).toString)
         try {
@@ -158,7 +151,7 @@ object ScalaJSFileUpload {
         //start upload
         xhr.open("POST", $id("upload").asInstanceOf[dom.HTMLFormElement].action, true)
         xhr.setRequestHeader("X-Request-With", "XMLHttpRequest")
-        xhr.setRequestHeader("X_FILENAME", file.name)
+        xhr.setRequestHeader("X-FILENAME", file.name)
         xhr.send(file)
       }
     }
@@ -192,4 +185,13 @@ object ScalaJSFileUpload {
     dom.document.body.appendChild(markup(csrfToken).render)
     scripts
   }
+}
+
+class FileReader() extends dom.EventTarget {
+
+  var onload: js.Function1[dom.Event, _] = ???
+
+  def readAsDataURL(blob: dom.Blob): Unit = ???
+  def readAsText(blob: dom.Blob): Unit = ???
+
 }
