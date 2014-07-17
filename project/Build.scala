@@ -100,15 +100,15 @@ object Dependencies {
     anorm,
     "com.typesafe.slick" %% "slick" % "2.1.0-M2",
     "com.typesafe.play" %% "play-slick" % "0.8.0-M1",
-    "com.lihaoyi" %% "upickle" % "0.1.3",
+    "com.lihaoyi" %% "upickle" % "0.1.5",
     "org.webjars" % "jquery" % "1.9.0"
   ) ++ shared
 
   val scalajs = Seq(
     "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % Versions.scalajsDom,
     "org.scala-lang.modules.scalajs" %% "scalajs-jasmine-test-framework" % scalaJSVersion % "test",
-    "com.lihaoyi" %%% "upickle" % "0.1.3",
-    "com.scalatags" %%% "scalatags" % "0.3.0",
+    "com.lihaoyi" %%% "upickle" % "0.1.5",
+    "com.scalatags" %%% "scalatags" % "0.3.8",
     "com.scalarx" %%% "scalarx" % "0.2.5",
     "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6"
   ) ++ shared

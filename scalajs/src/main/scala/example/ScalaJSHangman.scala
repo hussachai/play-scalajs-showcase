@@ -72,7 +72,7 @@ object ScalaJSHangman {
       Rx {
         div(
           h2("Please make a guess"),
-          h3(style := "letter-spacing: 4px;")(Model.game().guessWord),
+          h3(style := "letter-spacing: 4px;")(Model.game().guessWord.toString),
           p(s"You have made ${Model.game().misses} bad guesses out of a maximum of ${Model.game().level}"),
           p("Guess:")(
             for(c <- ('A' until 'Z'); if !Model.game().guess.contains(c)) yield {
