@@ -298,6 +298,6 @@ class FileReader() extends dom.EventTarget {
    * MDN
    */
   def readAsText(blob: Blob, encoding: String = "UTF-8"): Unit = ???
-  
+
 }
 
