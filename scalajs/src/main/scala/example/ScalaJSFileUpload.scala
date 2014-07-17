@@ -80,10 +80,7 @@ object ScalaJSFileUpload {
         e.asInstanceOf[dom.DragEvent].dataTransfer.files
 //        e.dataTransfer.files
       }
-//      dom.alert(files.toString)
-//      dom.alert((files != null).toString)
       (0 until files.length).foreach{ i =>
-//        dom.alert(files(i).toString)
         try {
           parseFile(files(i))
           uploadFile(files(i))
@@ -101,24 +98,25 @@ object ScalaJSFileUpload {
           | size: <strong>${file.size}</strong> bytes</p>
         """.stripMargin)
       val reader = new FileReader()
-      if(file.`type`.indexOf("image") == 0) {
+
+      if(file.`type`.indexOf("image") != -1) {
         reader.onload = (e: dom.UIEvent) => {
           output(
             s"""
               |<p><strong>${file.name}:</strong><br />
-              |<img src=""/>${e.target.result}</p>
+              |<img src="${reader.result}"/></p>
             """.stripMargin)
         }
         reader.readAsDataURL(file)
-      }else if(file.`type`.indexOf("text") == 0){
+      }else if(file.`type`.indexOf("text") != -1){
         reader.onload = (e: dom.UIEvent) => {
           output(
             s"""
               |<p><strong>${file.name}:</strong></p>
-              |<pre>${e.target.result}</pre>
+              |<pre>${reader.result}</pre>
             """.stripMargin)
-          reader.readAsText(file)
         }
+        reader.readAsText(file)
       }
     }
 
@@ -178,6 +176,9 @@ object ScalaJSFileUpload {
   }
 }
 
+/**
+ * Patch for scala-js-dom.
+ */
 object FileReader extends js.Object {
   //states
   val EMPTY: Short = 0
