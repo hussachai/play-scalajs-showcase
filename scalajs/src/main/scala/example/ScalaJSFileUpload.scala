@@ -1,7 +1,8 @@
 package example
 
+import java.io.FileReader
+
 import org.scalajs.dom
-import org.scalajs.dom.FileReader
 import shared.Csrf
 import scala.scalajs.js
 import scala.scalajs.js.Any
@@ -43,10 +44,6 @@ object ScalaJSFileUpload {
       a(href:="http://sitepoint.com/", "SitePoint.com"), ".")
   )
 
-  trait NodeExt extends dom.Node {
-    var style: js.Dynamic = ???
-    var action: String = ???
-  }
   trait EventTargetExt extends dom.EventTarget {
     var files: dom.FileList = ???
     var className: String = ???
@@ -63,8 +60,15 @@ object ScalaJSFileUpload {
     var onload: js.Function1[dom.Event, _] = ???
   }
 
+  class FileReader() extends dom.EventTarget {
+
+    var onload: js.Function1[dom.Event, _] = ???
+
+    def readAsDataURL(blob: dom.Blob): Unit = ???
+    def readAsText(blob: dom.Blob): Unit = ???
+
+  }
   def scripts = {
-    implicit def monkeyizeNode(e: dom.Node): NodeExt = e.asInstanceOf[NodeExt]
     implicit def monkeyizeEventTarget(e: dom.EventTarget): EventTargetExt = e.asInstanceOf[EventTargetExt]
     implicit def monkeyizeEvent(e: dom.Event): EventExt = e.asInstanceOf[EventExt]
     implicit def monkeyizeFileReader(e: dom.FileReader): FileReaderExt = e.asInstanceOf[FileReaderExt]
@@ -86,19 +90,21 @@ object ScalaJSFileUpload {
 
     def fileSelectHandler(e: dom.Event) = {
       fileDragHover(e)
-      dom.alert(e.target.files.toString)
-      val files = if(e.target.files.toString != "undefined") e.target.files else {
-        dom.alert(e.dataTransfer.toString)
-        e.dataTransfer.files
+      val files = if(e.target.files.toString != "undefined") {
+        e.target.files
+      } else {
+        e.asInstanceOf[dom.DragEvent].dataTransfer.files
+//        e.dataTransfer.files
       }
-//      dom.alert((files != null).toString)
+      dom.alert(files.toString)
+      dom.alert((files != null).toString)
       (0 until files.length).foreach{ i =>
 //        dom.alert(files(i).toString)
         try {
           parseFile(files(i))
           uploadFile(files(i))
         }catch{
-          case e:Throwable => dom.console.log(e.toString)
+          case e:Throwable => println(e)
         }
       }
     }
@@ -110,7 +116,7 @@ object ScalaJSFileUpload {
           | type: <strong>${file.`type`}</strong>
           | size: <strong>${file.size}</strong> bytes</p>
         """.stripMargin)
-      val reader = new FileReader{}
+      val reader = new FileReader()
       if(file.`type`.indexOf("image") == 0) {
         reader.onload = (e: dom.Event) => {
           output(
@@ -136,7 +142,7 @@ object ScalaJSFileUpload {
       val xhr = new dom.XMLHttpRequest
       if(xhr.upload != null && file.size <= maxFileSize){
         val o = $id("progress")
-        val progress = o.appendChild(dom.document.createElement("p"))
+        val progress = o.appendChild(dom.document.createElement("p")).asInstanceOf[dom.HTMLElement]
         progress.appendChild(dom.document.createTextNode(s"upload ${file.name}"))
 
         xhr.upload.addEventListener("progress", (e: dom.Event) => {
@@ -150,7 +156,7 @@ object ScalaJSFileUpload {
           }
         }
         //start upload
-        xhr.open("POST", $id("upload").action, true)
+        xhr.open("POST", $id("upload").asInstanceOf[dom.HTMLFormElement].action, true)
         xhr.setRequestHeader("X-Request-With", "XMLHttpRequest")
         xhr.setRequestHeader("X_FILENAME", file.name)
         xhr.send(file)
