@@ -299,14 +299,5 @@ class FileReader() extends dom.EventTarget {
    */
   def readAsText(blob: Blob, encoding: String = "UTF-8"): Unit = ???
 
-  /**
-   * The readAsText method is used to starts reading the contents of the specified Blob
-   * or File. When the read operation is finished, the readyState becomes DONE, and the
-   * loadend is triggered. At that time, the result attribute contains the contents of
-   * the file as a text string.
-   *
-   * MDN
-   */
-  def readAsText(blob: Blob): Unit = ???
-
 }
+
