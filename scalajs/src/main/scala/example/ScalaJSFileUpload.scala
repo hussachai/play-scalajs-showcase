@@ -1,11 +1,7 @@
 package example
 
-import java.io.FileReader
-
 import org.scalajs.dom
-import shared.Csrf
 import scala.scalajs.js
-import scala.scalajs.js.Any
 import scala.scalajs.js.annotation.JSExport
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import js.Dynamic.{global => g, _}
@@ -17,18 +13,18 @@ import org.scalajs.jquery.{jQuery=>$,_}
 object ScalaJSFileUpload {
 
   def markup(csrfToken: String) = div(
-    h1("HTML5 File Drag &amp; Drop API"),
-    p("""This is a demonstration of the HTML5 file drag &amp; drop API with asynchronous Ajax file uploads,
+    h1("HTML5 File Drag & Drop API"),
+    p("""This is a demonstration of the HTML5 file drag & drop API with asynchronous Ajax file uploads,
       graphical progress bars and progressive enhancement."""),
     form(id:= "upload", action:=s"/upload",
       target:="", "method".attr:="POST", "enctype".attr:="multipart/form-data"){
-      fieldset (
+      fieldset (id:="fileDrag")(
         legend("HTML File Upload"),
         input(`type`:="hidden", name:="csrfToken", value:=csrfToken),
         div (
           label(`for` := "", "Files to upload:"),
           input(`type` := "file", id := "fileSelect", name := "fileSelect", "multiple".attr := "multiple"),
-          div(id := "fileDrag", backgroundColor:= "green")("or drop files here")
+          div("or drop files here")
         ),
         div(id := "submitButton") (
           button(`type` := "submit")("Upload Files")
@@ -53,25 +49,13 @@ object ScalaJSFileUpload {
   trait EventExt extends dom.Event {
     var dataTransfer: dom.DataTransfer = ???
 
-    var loaded: Long = ???
-    var total: Long = ???
-  }
-  trait FileReaderExt extends dom.FileReader {
-    var onload: js.Function1[dom.Event, _] = ???
+    var loaded: Int = ???
+    var total: Int = ???
   }
 
-  class FileReader() extends dom.EventTarget {
-
-    var onload: js.Function1[dom.Event, _] = ???
-
-    def readAsDataURL(blob: dom.Blob): Unit = ???
-    def readAsText(blob: dom.Blob): Unit = ???
-
-  }
   def scripts = {
     implicit def monkeyizeEventTarget(e: dom.EventTarget): EventTargetExt = e.asInstanceOf[EventTargetExt]
     implicit def monkeyizeEvent(e: dom.Event): EventExt = e.asInstanceOf[EventExt]
-    implicit def monkeyizeFileReader(e: dom.FileReader): FileReaderExt = e.asInstanceOf[FileReaderExt]
 
     val maxFileSize = 3000000l
 
@@ -96,10 +80,7 @@ object ScalaJSFileUpload {
         e.asInstanceOf[dom.DragEvent].dataTransfer.files
 //        e.dataTransfer.files
       }
-      dom.alert(files.toString)
-      dom.alert((files != null).toString)
       (0 until files.length).foreach{ i =>
-//        dom.alert(files(i).toString)
         try {
           parseFile(files(i))
           uploadFile(files(i))
@@ -117,24 +98,25 @@ object ScalaJSFileUpload {
           | size: <strong>${file.size}</strong> bytes</p>
         """.stripMargin)
       val reader = new FileReader()
-      if(file.`type`.indexOf("image") == 0) {
-        reader.onload = (e: dom.Event) => {
+
+      if(file.`type`.indexOf("image") != -1) {
+        reader.onload = (e: dom.UIEvent) => {
           output(
             s"""
               |<p><strong>${file.name}:</strong><br />
-              |<img src=""/>${e.target.result}</p>
+              |<img src="${reader.result}"/></p>
             """.stripMargin)
         }
         reader.readAsDataURL(file)
-      }else if(file.`type`.indexOf("text") == 0){
-        reader.onload = (e: dom.Event) => {
+      }else if(file.`type`.indexOf("text") != -1){
+        reader.onload = (e: dom.UIEvent) => {
           output(
             s"""
               |<p><strong>${file.name}:</strong></p>
-              |<pre>${e.target.result}</pre>
+              |<pre>${reader.result}</pre>
             """.stripMargin)
-          reader.readAsText(file)
         }
+        reader.readAsText(file)
       }
     }
 
@@ -157,8 +139,8 @@ object ScalaJSFileUpload {
         }
         //start upload
         xhr.open("POST", $id("upload").asInstanceOf[dom.HTMLFormElement].action, true)
-        xhr.setRequestHeader("X-Request-With", "XMLHttpRequest")
-        xhr.setRequestHeader("X_FILENAME", file.name)
+        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
+        xhr.setRequestHeader("X-FILENAME", file.name)
         xhr.send(file)
       }
     }
@@ -316,6 +298,6 @@ class FileReader() extends dom.EventTarget {
    * MDN
    */
   def readAsText(blob: Blob, encoding: String = "UTF-8"): Unit = ???
-
+  
 }
 

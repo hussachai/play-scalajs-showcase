@@ -14,6 +14,8 @@ dist
 /RUNNING_PID
 .settings
 
+scalajvm/upload/*
+
 # temp files
 .~*
 *~
@@ -25,3 +27,4 @@ dist
 .cache
 .target
 bin/
+
