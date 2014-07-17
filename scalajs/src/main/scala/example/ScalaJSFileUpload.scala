@@ -102,7 +102,7 @@ object ScalaJSFileUpload {
         """.stripMargin)
       val reader = new FileReader()
       if(file.`type`.indexOf("image") == 0) {
-        reader.onload = (e: dom.Event) => {
+        reader.onload = (e: dom.UIEvent) => {
           output(
             s"""
               |<p><strong>${file.name}:</strong><br />
@@ -111,7 +111,7 @@ object ScalaJSFileUpload {
         }
         reader.readAsDataURL(file)
       }else if(file.`type`.indexOf("text") == 0){
-        reader.onload = (e: dom.Event) => {
+        reader.onload = (e: dom.UIEvent) => {
           output(
             s"""
               |<p><strong>${file.name}:</strong></p>
