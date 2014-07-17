@@ -13,18 +13,18 @@ import org.scalajs.jquery.{jQuery=>$,_}
 object ScalaJSFileUpload {
 
   def markup(csrfToken: String) = div(
-    h1("HTML5 File Drag &amp; Drop API"),
-    p("""This is a demonstration of the HTML5 file drag &amp; drop API with asynchronous Ajax file uploads,
+    h1("HTML5 File Drag & Drop API"),
+    p("""This is a demonstration of the HTML5 file drag & drop API with asynchronous Ajax file uploads,
       graphical progress bars and progressive enhancement."""),
     form(id:= "upload", action:=s"/upload",
       target:="", "method".attr:="POST", "enctype".attr:="multipart/form-data"){
-      fieldset (
+      fieldset (id:="fileDrag")(
         legend("HTML File Upload"),
         input(`type`:="hidden", name:="csrfToken", value:=csrfToken),
         div (
           label(`for` := "", "Files to upload:"),
           input(`type` := "file", id := "fileSelect", name := "fileSelect", "multiple".attr := "multiple"),
-          div(id := "fileDrag", backgroundColor:= "green")("or drop files here")
+          div("or drop files here")
         ),
         div(id := "submitButton") (
           button(`type` := "submit")("Upload Files")
@@ -141,7 +141,7 @@ object ScalaJSFileUpload {
         }
         //start upload
         xhr.open("POST", $id("upload").asInstanceOf[dom.HTMLFormElement].action, true)
-        xhr.setRequestHeader("X-Request-With", "XMLHttpRequest")
+        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
         xhr.setRequestHeader("X-FILENAME", file.name)
         xhr.send(file)
       }
