@@ -15,25 +15,31 @@ object ScalaJSFileUpload {
   def markup(csrfToken: String) = div(
     p("""This is a demonstration of the HTML5 file drag & drop API with asynchronous Ajax file uploads,
       graphical progress bars and progressive enhancement."""),
-    form(id:= "upload", action:=s"/upload",
-      target:="", "method".attr:="POST", "enctype".attr:="multipart/form-data"){
-      fieldset (id:="fileDrag")(
-        legend("HTML File Upload"),
-        input(`type`:="hidden", name:="csrfToken", value:=csrfToken),
-        div (
-          label(`for` := "", "Files to upload:"),
-          input(`type` := "file", id := "fileSelect", name := "fileSelect", "multiple".attr := "multiple"),
-          div("or drop files here")
-        ),
-        div(id := "submitButton") (
-          button(`type` := "submit")("Upload Files")
+    form(id:= "upload", action:=s"/upload", "role".attr:="form",
+      "method".attr:="POST", "enctype".attr:="multipart/form-data")(
+      input(`type`:="hidden", name:="csrfToken", value:=csrfToken),
+      div(id:="fileDrag", `class`:="panel panel-info")(
+        div(`class`:="panel-heading")(h3(`class`:="panel-title", "HTML File Upload")),
+        div(`class`:="panel-body")(
+          div (
+            label(`for` := "", "Files to upload:"),
+            input(`type` := "file", id := "fileSelect", name := "fileSelect", "multiple".attr := "multiple"),
+            div("or drop files here")
+          ),
+          div(id := "submitButton", `class`:="hide") (
+            button(`type` := "submit")("Upload Files")
+          )
         )
       )
-    },
-    div(id:="progress"),
-    div(id:="messages")(p("Status Messages")),
+    ),
+    div(`class`:="progress")(
+      div(id:="progress", `class`:="progress-bar progress-bar-success progress-bar-striped", "role".attr:="progressbar", "aria-valuenow".attr:="0",
+        "aria-valuemin".attr:="0", "aria-valuemax".attr:="100", style:="width: 100%", "0%")
+    ),
+    h4("Status Messages")(span(style:="margin-left:15px;"), span(id:="status", `class`:="label hide", "Done")),
+    div(id:="messages", `class`:="alert alert-info"),
     br,
-    p("Ported from ",
+    p("Ported and modified from ",
       a(href:="http://www.sitepoint.com/html5-file-drag-and-drop/", "How to Use HTML5 File Drag and Drop"),
       " by ",
       a(href:="http://twitter.com/craigbuckler", "Craig Buckler")
@@ -42,8 +48,6 @@ object ScalaJSFileUpload {
 
   trait EventTargetExt extends dom.EventTarget {
     var files: dom.FileList = ???
-    var className: String = ???
-    var result: js.Any = ???
 
   }
   trait EventExt extends dom.Event {
@@ -53,7 +57,8 @@ object ScalaJSFileUpload {
     var total: Int = ???
   }
 
-  def scripts = {
+  def scripts(demo: Boolean) = {
+
     implicit def monkeyizeEventTarget(e: dom.EventTarget): EventTargetExt = e.asInstanceOf[EventTargetExt]
     implicit def monkeyizeEvent(e: dom.Event): EventExt = e.asInstanceOf[EventExt]
 
@@ -69,7 +74,11 @@ object ScalaJSFileUpload {
     def fileDragHover(e: dom.Event) = {
       e.stopPropagation()
       e.preventDefault()
-      e.target.className = if(e.`type` == "dragover") "hover" else ""
+      if(e.`type` == "dragover") {
+        $("#fileDrag").removeClass("panel-info").addClass("panel-primary")
+      }else {
+        $("#fileDrag").removeClass("panel-primary").addClass("panel-info")
+      }
     }
 
     def fileSelectHandler(e: dom.Event) = {
@@ -83,7 +92,11 @@ object ScalaJSFileUpload {
       (0 until files.length).foreach{ i =>
         try {
           parseFile(files(i))
-          uploadFile(files(i))
+          if(demo){
+            dom.alert("Not allow file upload in demo mode")
+          }else{
+            uploadFile(files(i))
+          }
         }catch{
           case e:Throwable => println(e)
         }
@@ -123,18 +136,20 @@ object ScalaJSFileUpload {
     def uploadFile(file: dom.File) = {
       val xhr = new dom.XMLHttpRequest
       if(xhr.upload != null && file.size <= maxFileSize){
-        val o = $id("progress")
-        val progress = o.appendChild(dom.document.createElement("p")).asInstanceOf[dom.HTMLElement]
-        progress.appendChild(dom.document.createTextNode(s"upload ${file.name}"))
 
         xhr.upload.addEventListener("progress", (e: dom.Event) => {
-          val pc = 100 - (e.loaded / e.total * 100)
-          progress.style.backgroundPosition = s"$pc % 0"
+          val pc = (e.loaded / e.total * 100)
+          $("#progress").css("with", pc+"%").attr("aria-valuenow", pc.toString)
+            .html(s"${file.name} ($pc %)")
         }, false)
 
         xhr.onreadystatechange = (e: dom.Event) => {
-          if(xhr.readyState == 4){
-            progress.className = if(xhr.status == 200) "success" else "failure"
+          if(xhr.readyState == dom.XMLHttpRequest.UNSENT){
+            $("#status").addClass("hide")
+          }else if(xhr.readyState == dom.XMLHttpRequest.DONE){
+            val statusClass = if(xhr.status == 200) "label-success" else "label-danger"
+            val statusMsg = if(xhr.status == 200) "Success" else "Error"
+            $("#status").removeClass("hide").addClass(statusClass).text(statusMsg)
           }
         }
         //start upload
@@ -145,33 +160,25 @@ object ScalaJSFileUpload {
       }
     }
 
-    def init = {
-
-      $("#fileDrag").on("dragenter dragstart dragend dragleave dragover drag drop", (e: dom.Event) => {
-        e.preventDefault();
+    $("#fileDrag").on("dragenter dragstart dragend dragleave dragover drag drop", (e: dom.Event) => {
+        e.preventDefault()
       });
 
-      $id("fileSelect").addEventListener("change", fileSelectHandler _, false)
-      $id("fileSelect").ondragend
-      val xhr = new dom.XMLHttpRequest
-      if(xhr.upload != null){
-        val fileDrag = $id("fileDrag")
-        fileDrag.addEventListener("dragover", fileDragHover _, false)
-        fileDrag.addEventListener("dragleave", fileDragHover _, false)
-        fileDrag.addEventListener("drop", fileSelectHandler _, false)
-        fileDrag.style.display = "block"
-
-        $id("submitButton").style.display = "none"
-      }
+    $id("fileSelect").addEventListener("change", fileSelectHandler _, false)
+    $id("fileSelect").ondragend
+    val xhr = new dom.XMLHttpRequest
+    if(xhr.upload != null){
+      val fileDrag = $id("fileDrag")
+      fileDrag.addEventListener("dragover", fileDragHover _, false)
+      fileDrag.addEventListener("dragleave", fileDragHover _, false)
+      fileDrag.addEventListener("drop", fileSelectHandler _, false)
     }
-
-    init
   }
 
   @JSExport
-  def main(csrfToken: String) = {
+  def main(csrfToken: String, demo: Boolean) = {
     dom.document.getElementById("content").appendChild(markup(csrfToken).render)
-    scripts
+    scripts(demo)
   }
 }
 

@@ -1,10 +1,7 @@
 @(csrfToken: shared.Csrf)(implicit request: RequestHeader)
-
-@header = {
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/fileupload.css")">
-}
-@templates.main("HTML5 File Drag & Drop API", header){
+@import play.api.Play
+@templates.main("HTML5 File Drag & Drop API"){
     <script>
-        ScalaJSFileUpload().main ("@{csrfToken}")
+        ScalaJSFileUpload().main ("@{csrfToken}", @Play.isProd(Play.current) )
     </script>
 }
