@@ -13,6 +13,11 @@ import org.scalajs.jquery.{jQuery=>$,_}
 object ScalaJSFileUpload {
 
   def markup(csrfToken: String) = div(
+    p("Modified from ",
+      a(href:="http://www.sitepoint.com/html5-file-drag-and-drop/", "How to Use HTML5 File Drag and Drop"),
+      " by ",
+      a(href:="http://twitter.com/craigbuckler", "Craig Buckler")
+    ),
     p("""This is a demonstration of the HTML5 file drag & drop API with asynchronous Ajax file uploads,
       graphical progress bars and progressive enhancement."""),
     form(id:= "upload", action:=s"/upload", "role".attr:="form",
@@ -37,13 +42,7 @@ object ScalaJSFileUpload {
         "aria-valuemin".attr:="0", "aria-valuemax".attr:="100", style:="width: 100%", "0%")
     ),
     h4("Status Messages")(span(style:="margin-left:15px;"), span(id:="status", `class`:="label hide", "Done")),
-    div(id:="messages", `class`:="alert alert-info"),
-    br,
-    p("Ported and modified from ",
-      a(href:="http://www.sitepoint.com/html5-file-drag-and-drop/", "How to Use HTML5 File Drag and Drop"),
-      " by ",
-      a(href:="http://twitter.com/craigbuckler", "Craig Buckler")
-    )
+    div(id:="messages", `class`:="alert alert-info")
   )
 
   trait EventTargetExt extends dom.EventTarget {

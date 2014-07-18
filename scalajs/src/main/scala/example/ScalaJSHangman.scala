@@ -98,6 +98,7 @@ object ScalaJSHangman {
       (3, "Hard game; you are allowed 3 misses.")
     )
     div(
+      p("Inspired from ")(a(href:="http://www.yiiframework.com/demos/hangman/", target:="_blank","Yii's demo")),
       p("This is the game of Hangman. You must guess a word, a letter at a time.\n" +
         "If you make too many mistakes, you lose the game!"),
       form(id := "playForm")(
@@ -107,7 +108,7 @@ object ScalaJSHangman {
             input(id:=levelId, `type`:="radio", name:="level", onclick:={ ()=>
               Model.level() = level
             }, {if(level == Model.level()) checked:="checked"}),
-            label(`for`:=levelId)(text)
+            label(`for`:=levelId, style:="padding-left: 5px")(text)
           )
         }, br,
         input(`type`:="button", value:="Play!", `class`:="btn btn-primary", onclick:={ () =>
