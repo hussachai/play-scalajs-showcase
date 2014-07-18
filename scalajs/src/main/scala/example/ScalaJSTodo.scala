@@ -129,9 +129,8 @@ object ScalaJSTodo {
   def templateFooter = {
     footer(id:="info")(
       p("Double-click to edit a todo"),
-      p(a(href:="https://github.com/lihaoyi/workbench-example-app/blob/todomvc/src/main/scala/example/ScalaJSExample.scala")("Source Code")),
-      p("Created by ", a(href:="http://github.com/lihaoyi")("Li Haoyi")),
-      p(a(href:="https://github.com/hussachai/play-with-scalajs-example")("Modified version"))
+      p("Original version created by ", a(href:="https://github.com/lihaoyi/workbench-example-app/blob/todomvc/src/main/scala/example/ScalaJSExample.scala")("Li Haoyi")),
+      p("Modified version with database backend can be found ", a(href:="https://github.com/hussachai/play-scalajs-showcase")("here"))
     )
   }
 
