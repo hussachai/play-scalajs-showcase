@@ -19,7 +19,11 @@ GET           /hangman/session             controllers.HangmanController.session
 POST          /hangman/guess/:g            controllers.HangmanController.guess(g: Char)
 POST          /hangman/giveup              controllers.HangmanController.giveup
 
+GET           /upload                      controllers.FileUploadController.index
+POST          /upload                      controllers.FileUploadController.uploadFile
+
 GET           /interop                     controllers.InteropController.index
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                controllers.Assets.at(path="/public", file)
