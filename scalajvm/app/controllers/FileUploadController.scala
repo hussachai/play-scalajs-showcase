@@ -13,6 +13,9 @@ object FileUploadController extends Controller {
 
   val log = play.Logger.of("application") //same as play.Logger
 
+  val uploadDir = Play.getFile("upload")
+  if(!uploadDir.exists()) uploadDir.mkdir()
+
   def index = CSRFAddToken { Action { implicit request =>
     import play.filters.csrf.CSRF
     val token = CSRF.getToken(request).map(t=>Csrf(t.value)).getOrElse(Csrf(""))
@@ -36,7 +39,7 @@ object FileUploadController extends Controller {
   }
 
   private def createFile(name: String): File = {
-    val upload = Play.getFile("upload").getAbsolutePath + File.separatorChar
+    val upload = uploadDir.getAbsolutePath + File.separatorChar
     val extPos = name.lastIndexOf(".")
     val ext = if(extPos != -1) name.substring(extPos) else ""
     new File(upload+UUID.randomUUID.toString+ext)
