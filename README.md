@@ -1,4 +1,11 @@
-# Play Framework with Scala.js
+# Play Framework with Scala.js Showcase
+
+Live demo: http://play-scalajs.hussachai.cloudbees.net
+
+This project uses https://github.com/vmunier/play-with-scalajs-example as project structure
+
+I hope you enjoy learning Play and Scala.js from this project
+Your contribution is always welcome.
 
 This is a simple example application showing how you can integrate a Play project with a Scala.js project.
 
