@@ -23,17 +23,20 @@ object ScalaJSFileUpload {
     form(id:= "upload", action:=s"/upload", "role".attr:="form",
       "method".attr:="POST", "enctype".attr:="multipart/form-data")(
       input(`type`:="hidden", name:="csrfToken", value:=csrfToken),
-      div(id:="fileDrag", `class`:="panel panel-info")(
+      div(`class`:="panel panel-info")(
         div(`class`:="panel-heading")(h3(`class`:="panel-title", "HTML File Upload")),
         div(`class`:="panel-body")(
           div (
             label(`for` := "", "Files to upload:"),
-            input(`type` := "file", id := "fileSelect", name := "fileSelect", "multiple".attr := "multiple"),
-            div("or drop files here")
+            input(`type` := "file", id := "fileSelect", name := "fileSelect", "multiple".attr := "multiple")
           ),
           div(id := "submitButton", `class`:="hide") (
             button(`type` := "submit")("Upload Files")
-          )
+          ), br,
+          div(id:="fileDrag", `class`:="panel panel-info",
+            style:="height: 70px; border-style: dashed; border-width: 2px;text-align: center;")(
+              p(style:="margin-top:20px;")("Or drop file here...")
+            )
         )
       )
     ),
@@ -147,7 +150,7 @@ object ScalaJSFileUpload {
             $("#status").addClass("hide")
           }else if(xhr.readyState == dom.XMLHttpRequest.DONE){
             val statusClass = if(xhr.status == 200) "label-success" else "label-danger"
-            val statusMsg = if(xhr.status == 200) "Success" else "Error"
+            val statusMsg = if(xhr.status == 200) "Success" else "Error "+xhr.statusText
             $("#status").removeClass("hide").addClass(statusClass).text(statusMsg)
           }
         }
