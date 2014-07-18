@@ -13,7 +13,6 @@ import org.scalajs.jquery.{jQuery=>$,_}
 object ScalaJSFileUpload {
 
   def markup(csrfToken: String) = div(
-    h1("HTML5 File Drag & Drop API"),
     p("""This is a demonstration of the HTML5 file drag & drop API with asynchronous Ajax file uploads,
       graphical progress bars and progressive enhancement."""),
     form(id:= "upload", action:=s"/upload",
@@ -34,10 +33,11 @@ object ScalaJSFileUpload {
     div(id:="progress"),
     div(id:="messages")(p("Status Messages")),
     br,
-    h2("Disclaimer"),
-    p("The original code was developed by ", a(href:="http://twitter.com/craigbuckler", "Craig Buckler"), " of ",
-      a(href:="http://optimalworks.net/", "OptimalWorks.net"), " for ",
-      a(href:="http://sitepoint.com/", "SitePoint.com"), ".")
+    p("Ported from ",
+      a(href:="http://www.sitepoint.com/html5-file-drag-and-drop/", "How to Use HTML5 File Drag and Drop"),
+      " by ",
+      a(href:="http://twitter.com/craigbuckler", "Craig Buckler")
+    )
   )
 
   trait EventTargetExt extends dom.EventTarget {
@@ -170,8 +170,7 @@ object ScalaJSFileUpload {
 
   @JSExport
   def main(csrfToken: String) = {
-    dom.document.body.innerHTML = ""
-    dom.document.body.appendChild(markup(csrfToken).render)
+    dom.document.getElementById("content").appendChild(markup(csrfToken).render)
     scripts
   }
 }
@@ -194,7 +193,7 @@ class FileReader() extends dom.EventTarget {
    *
    * MDN
    */
-  val error: DOMError = ???
+  def error: DOMError = ???
 
   /**
    * A number indicating the state of the FileReader. This will be one of the State constants.
@@ -204,7 +203,7 @@ class FileReader() extends dom.EventTarget {
    *
    * MDN
    */
-  val readyState: Short = ???
+  def readyState: Short = ???
 
   /**
    * The file's contents. This property is only valid after the read operation is
@@ -213,7 +212,7 @@ class FileReader() extends dom.EventTarget {
    *
    * MDN
    */
-  val result: js.Any = ???
+  def result: js.Any = ???
 
   /**
    * A handler for the abort event. This event is triggered each time the reading

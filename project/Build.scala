@@ -104,7 +104,8 @@ object Dependencies {
     "org.webjars" %% "webjars-play" % "2.3.0",
     "org.webjars" % "jquery" % "2.1.1",
     "org.webjars" % "codemirror" % "4.3",
-    "org.webjars" % "bootstrap" % "3.2.0"
+    "org.webjars" % "bootstrap" % "3.2.0",
+    "org.webjars" % "font-awesome" % "4.1.0"
   ) ++ shared
 
   val scalajs = Seq(

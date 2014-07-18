@@ -1,31 +1,12 @@
-@(message: String)
+@(message: String)(implicit request: RequestHeader)
 
-@templates.main("Play with Scala.js"){
-<h2>Trivial example</h2>
-<h3>Play and Scala.js share a same message</h3>
-<ul>
-  <li>Play shouts out: <em>@message</em></li>
-  <li>Scala.js shouts out: <em id="scalajsShoutOut"></em></li>
-</ul>
-<script src="@routes.Assets.at("javascripts/scalajs-example-launcher.js")" type="text/javascript"></script>
-
-<h2>More fun examples</h2>
-<ul>
-    <li>
-        <a href="todos">Reactive TodoMVC</a> (Modified from
-            <a href="http://lihaoyi.github.io/workbench-example-app/todo.html">TodoMVC</a> by
-            <a href="https://github.com/lihaoyi">Li Haoyi</a>)
-    </li>
-    <li>
-        <a href="hangman">Reactive Hangman</a> an implementation of the
-        <a href="http://www.yiiframework.com/demos/hangman/">Hangman example application</a>
-        using Scala.js, Scalatags, Scala.Rx and scala-js-dom. <br />
-        It also supports persisting state like original version.
-    </li>
-    <li>
-        <a href="upload">HTML5 XMLHttpRequest.upload</a> Drag&amp;Drop File Upload which is originally
-        developed by <a href="http://twitter.com/craigbuckler">Craig Buckler</a>.<br/>
-        The javascript code is ported to Scala.js and HTML markup is ported to Scalatags.
-    </li>
-</ul>
+@content = {
+  <h3>Play and Scala.js share a same message</h3>
+  <ul>
+    <li>Play shouts out: <em>@message</em></li>
+    <li>Scala.js shouts out: <em id="scalajsShoutOut"></em></li>
+  </ul>
+}
+@templates.main("Trivial example", content = content){
+    <script src="@routes.Assets.at("javascripts/scalajs-example-launcher.js")" type="text/javascript"></script>
 }

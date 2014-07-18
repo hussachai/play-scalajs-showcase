@@ -65,26 +65,24 @@ object ScalaJSHangman {
 
   var currentNode: dom.Node = null
 
-  val header = h1("Hangman Game")
-
   def pageGuess: TypedTag[dom.HTMLElement] = div(`class`:="content"){
-    div(header,
+    div(
       Rx {
         div(
           h2("Please make a guess"),
-          h3(style := "letter-spacing: 4px;")(Model.game().guessWord.toString),
+          h3(style := "letter-spacing: 4px;")(Model.game().guessWord.mkString),
           p(s"You have made ${Model.game().misses} bad guesses out of a maximum of ${Model.game().level}"),
           p("Guess:")(
             for(c <- ('A' until 'Z'); if !Model.game().guess.contains(c)) yield {
-              a(c)(style:="padding-left:5px;", href:="javascript:void(0);", onclick:={ () =>
+              a(c.toString)(style:="padding-left:10px;", href:="javascript:void(0);", onclick:={ () =>
                 Model.guess(c){ () =>
-                  if(Model.game().gameOver) {
+                  if(Model.game().gameOver()) {
                     goto(pageResult)
                   }
                 }
               })
             }
-          ),
+          ), br,
           a("Give up?", href := "javascript:void(0);", onclick := { () =>
             Model.giveup{ () => goto(pagePlay) }
           })
@@ -99,20 +97,20 @@ object ScalaJSHangman {
       (5, "Medium game; you are allowed 5 misses."),
       (3, "Hard game; you are allowed 3 misses.")
     )
-    div(header,
+    div(
       p("This is the game of Hangman. You must guess a word, a letter at a time.\n" +
         "If you make too many mistakes, you lose the game!"),
       form(id := "playForm")(
         for((level,text) <- levels) yield {
           val levelId = s"level_${level}"
-          p(
+          div(`class`:="radio")(
             input(id:=levelId, `type`:="radio", name:="level", onclick:={ ()=>
               Model.level() = level
             }, {if(level == Model.level()) checked:="checked"}),
             label(`for`:=levelId)(text)
           )
-        },
-        input(`type`:="button", value:="Play!", onclick:={ () =>
+        }, br,
+        input(`type`:="button", value:="Play!", `class`:="btn btn-primary", onclick:={ () =>
           if(Model.level() > 0) {
             Model.start()
             goto(pageGuess)
@@ -125,18 +123,20 @@ object ScalaJSHangman {
   }
 
   def pageResult: TypedTag[dom.HTMLElement] = div{
-    val result = if(Model.game().won) "You Win!" else "You Lose!"
-    div(header,
+    val result = if(Model.game().won()) "You Win!" else "You Lose!"
+    div(
       h2(result),
-      p(s"The word was: ${Model.game().word}"),
-      input(`type`:="button", value:="Start Again!", onclick:={ () =>
+      p(s"The word was: ${Model.game().word}"), br,
+      input(`type`:="button", value:="Start Again!", `class`:="btn btn-primary", onclick:={ () =>
         goto(pagePlay)
       })
     )
   }
 
   def goto(page: TypedTag[dom.HTMLElement]) = {
-    dom.document.replaceChild(div(style:="margin-left:20px;")(page).render, dom.document.lastChild)
+    val lastChild = dom.document.getElementById("content").lastChild
+    dom.document.getElementById("content")
+      .replaceChild(div(style:="margin-left:20px;")(page).render, lastChild)
   }
 
   @JSExport
@@ -145,8 +145,7 @@ object ScalaJSHangman {
       currentNode = if(resume) {
         if(Model.game().gameOver) pageResult.render else pageGuess.render
       } else pagePlay.render
-      dom.document.body.innerHTML = ""
-      dom.document.body.appendChild(currentNode)
+      dom.document.getElementById("content").appendChild(currentNode)
     }}
   }
 

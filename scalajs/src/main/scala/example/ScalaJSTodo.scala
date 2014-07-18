@@ -98,7 +98,6 @@ object ScalaJSTodo {
 
   def templateHeader = {
     header(id:="header")(
-      h1("todos"),
       form(
         inputBox,
         onsubmit := { () =>
@@ -207,9 +206,8 @@ object ScalaJSTodo {
   @JSExport
   def main(): Unit = {
 
-    dom.document.body.innerHTML = ""
     Model.init.map { r =>
-      dom.document.body.appendChild(
+      dom.document.getElementById("content").appendChild(
         section(id:="todoapp")(
           templateHeader,
           templateBody,

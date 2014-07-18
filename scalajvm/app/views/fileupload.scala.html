@@ -1,9 +1,9 @@
-@(csrfToken: shared.Csrf)
+@(csrfToken: shared.Csrf)(implicit request: RequestHeader)
 
 @header = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/fileupload.css")">
 }
-@main("File Upload", header){
+@templates.main("HTML5 File Drag & Drop API", header){
     <script>
         ScalaJSFileUpload().main ("@{csrfToken}")
     </script>

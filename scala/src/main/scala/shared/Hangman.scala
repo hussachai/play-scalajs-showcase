@@ -8,18 +8,18 @@ case class Hangman(
   misses: Int = 0
 ){
 
-  def guessWord = {
+  def guessWord() = {
     for(c <- word.toCharArray) yield {
       if(guess.contains(c)) c
       else '_'
     }
   }
 
-  def gameOver: Boolean = {
+  def gameOver(): Boolean = {
     (misses >= level) || won
   }
 
-  def won = {
+  def won() = {
     (for(c <- word.toCharArray) yield {
       guess.contains(c)
     }).find(i=>i==false) == None
