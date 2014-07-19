@@ -1,4 +1,5 @@
-@()(implicit request: RequestHeader)
+@(json: String)(implicit request: RequestHeader)
+
 
 @header = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("lib/codemirror/lib/codemirror.css")" />
@@ -9,5 +10,8 @@
 }
 @templates.main("Scala.js and Javascript interoperability", header){
 
-    <script>ScalaJSInterop().main()</script>
+    <script>
+        var json = @Html(json)
+        ScalaJSInterop().main(json)
+    </script>
 }

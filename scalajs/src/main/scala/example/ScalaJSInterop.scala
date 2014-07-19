@@ -1,10 +1,12 @@
 package example
 
 import scala.scalajs.js
+import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.JSExport
 import org.scalajs.dom
 import scalatags.JsDom._
 import all._
+import shared.foo._
 
 @JSExport
 object ScalaJSInterop {
@@ -33,12 +35,15 @@ object ScalaJSInterop {
 
 
   @JSExport
-  def main() = {
+  def main(foo: js.Dynamic) = {
+//    foo.listInt.asInstanceOf[js.Array[Int]](2).toString
+    dom.alert(JSON.stringify(foo))
     dom.document.body.appendChild(template.render)
     runScript
   }
 
 }
+
 
 /**
  * This represents Foo class in javascript
