@@ -27,7 +27,5 @@ GET           /interop                     controllers.InteropController.index
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                controllers.Assets.at(path="/public", file)
 
-GET           /chat                                 controllers.ChatController.index
-GET           /chat/room                            controllers.ChatController.chatRoom(username: Option[String])
-GET           /chat/room/chat                       controllers.ChatController.chat(username)
-GET           /chat/javascripts/chatroom.js         controllers.ChatController.chatRoomJs(username: String)
+GET           /chat                        controllers.ChatController.index
+GET           /chat/ws                     controllers.ChatController.chat(username)

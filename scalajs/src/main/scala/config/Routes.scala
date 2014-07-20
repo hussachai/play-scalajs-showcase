@@ -18,4 +18,5 @@ object Routes {
     def guess(g: Char) = base + s"/guess/$g"
     def giveup = base + "/giveup"
   }
+
 }

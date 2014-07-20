@@ -46,6 +46,7 @@
             <li class="menu"><a href="@routes.TodoController.index()">Reactive TodoMVC</a></li>
             <li class="menu"><a href="@routes.HangmanController.index()">Reactive Hangman</a></li>
             <li class="menu"><a href="@routes.FileUploadController.index()">HTML5 File Upload</a></li>
+            <li class="menu"><a href="@routes.ChatController.index()">WebSocket Chat</a></li>
           </ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
@@ -81,12 +82,14 @@
           }
         })
     </script>
+
     @if(Play.isDev(Play.current)) {
         <script src="@routes.Assets.at("javascripts/scalajs-example-fastopt.js")" type="text/javascript"></script>
     }else {
         <!-- for production (play dist), use the optimized version instead -->
         <script src="@routes.Assets.at("javascripts/scalajs-example-opt.js")" type="text/javascript"></script>
     }
+
     @javascripts
 
   </body>
