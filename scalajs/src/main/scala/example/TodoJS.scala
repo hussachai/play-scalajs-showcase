@@ -15,7 +15,7 @@ import scala.concurrent.Future
 
 
 @JSExport
-object ScalaJSTodo {
+object TodoJS {
   import Framework._
 
   object Model {
@@ -149,14 +149,9 @@ object ScalaJSTodo {
             "ondblclick".attr := { () =>
               Model.editing() = Some(task)
             },
-            input(
-              `class` := "toggle",
-              `type` := "checkbox",
-              cursor := "pointer",
-              onchange := { () =>
+            input(`class`:= "toggle", `type`:= "checkbox", cursor:= "pointer", onchange:= { () =>
                 Model.update(task.copy(done = !task.done))
-              },
-              if (task.done) checked := true
+              }, if (task.done) checked := true else ""
             ),
             label(task.txt),
             button(

@@ -10,7 +10,7 @@ object ScalaJSExampleTest extends JasmineTest {
   describe("ScalaJSExample") {
 
     it("should implement square()") {
-      import ScalaJSExample._
+      import ExampleJS._
 
       expect(square(0)).toBe(0)
       expect(square(4)).toBe(16)

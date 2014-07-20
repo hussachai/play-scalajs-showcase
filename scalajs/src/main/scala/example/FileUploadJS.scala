@@ -10,7 +10,7 @@ import all._
 import org.scalajs.jquery.{jQuery=>$,_}
 
 @JSExport
-object ScalaJSFileUpload {
+object FileUploadJS {
 
   def markup(csrfToken: String) = div(
     p("Modified from ",
@@ -59,7 +59,7 @@ object ScalaJSFileUpload {
     var total: Int = ???
   }
 
-  def scripts(demo: Boolean) = {
+  def ready(demo: Boolean) = {
 
     implicit def monkeyizeEventTarget(e: dom.EventTarget): EventTargetExt = e.asInstanceOf[EventTargetExt]
     implicit def monkeyizeEvent(e: dom.Event): EventExt = e.asInstanceOf[EventExt]
@@ -180,7 +180,7 @@ object ScalaJSFileUpload {
   @JSExport
   def main(csrfToken: String, demo: Boolean) = {
     dom.document.getElementById("content").appendChild(markup(csrfToken).render)
-    scripts(demo)
+    ready(demo)
   }
 }
 

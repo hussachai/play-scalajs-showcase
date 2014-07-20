@@ -18,7 +18,7 @@ import upickle._
 import upickle.Implicits._
 
 @JSExport
-object ScalaJSHangman {
+object HangmanJS {
 
   implicit val hangmanPickler = Case4ReadWriter(Hangman.apply, Hangman.unapply)
 

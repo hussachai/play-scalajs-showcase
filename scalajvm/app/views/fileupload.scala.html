@@ -2,6 +2,6 @@
 @import play.api.Play
 @templates.main("HTML5 File Drag & Drop API"){
     <script>
-        ScalaJSFileUpload().main ("@{csrfToken}", @Play.isProd(Play.current) )
+        FileUploadJS().main ("@{csrfToken}", @Play.isProd(Play.current) )
     </script>
 }
