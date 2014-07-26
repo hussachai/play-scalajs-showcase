@@ -245,7 +245,7 @@ class EventSource(URL: String, settings: js.Dynamic = null) extends dom.EventTar
 
 }
 
-object EventSource {
+object EventSource extends js.Object {
   /**
    * The connection has not yet been established, or it was closed and the user agent is reconnecting.
    * W3C 2012
