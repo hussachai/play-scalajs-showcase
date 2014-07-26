@@ -20,8 +20,45 @@ import akka.pattern.ask
 
 import play.api.Play.current
 import play.api.libs.concurrent.Execution.Implicits._
-
+import play.{Logger=>log}
 import scala.util.Random
+
+trait ChatUserStore {
+
+  def get(username: String): Option[User]
+
+  def list(): List[User]
+
+  def save(user: User): Boolean
+
+  def remove(username: String): Boolean
+
+}
+
+object ChatUserMemStore extends ChatUserStore {
+
+  import scala.collection.mutable.{Map=>MutableMap}
+
+  val users = MutableMap.empty[String, String] //Map of username, avatar
+
+  override def get(username: String): Option[User] = {
+    users.get(username).map{User(username, _)}
+  }
+
+  override def list(): List[User] = {
+    users.toList.map{e => User(e._1, e._2)}
+  }
+
+  override def save(user: User): Boolean = {
+    users.put(user.username, user.avatar).map{s=>true}.getOrElse(false)
+  }
+
+  override def remove(username: String): Boolean = {
+    users.remove(username).map{s=>true}.getOrElse(false)
+  }
+
+
+}
 
 object Robot {
 
@@ -57,6 +94,8 @@ object ChatRoom {
 
   implicit val timeout = Timeout(1 second)
 
+  val store = ChatUserMemStore
+
   val rand = new Random()
   val fileFilter = new FileFilter {
     override def accept(file: File): Boolean = file.getName.endsWith(".png")
@@ -77,54 +116,55 @@ object ChatRoom {
     avatars(rand.nextInt(avatars.length))
   }
 
-  def join(username:String): Future[(Iteratee[JsValue,_],Enumerator[JsValue])] = {
+  def join(username: String): Future[(Iteratee[JsValue,_],Enumerator[JsValue])] = {
 
     (default ? Join(username)).map {
 
       case Connected(user, enumerator) =>
-
         // Create an Iteratee to consume the feed
         val iteratee = Iteratee.foreach[JsValue] { event =>
-          default ! Talk(user, HtmlEscapers.htmlEscaper()
-            .escape((event \ "text").as[String]).replace("\n", "<br/>"))
+          talk(user, (event \ "text").as[String])
         }.map { _ =>
           default ! Quit(user)
         }
-
-        (iteratee,enumerator)
+        (iteratee, enumerator)
 
       case CannotConnect(error) =>
-
         // Connection error
-
         // A finished Iteratee sending EOF
         val iteratee = Done[JsValue,Unit]((),Input.EOF)
-
         // Send an error and close the socket
         val enumerator =  Enumerator[JsValue](JsObject(Seq("error" -> JsString(error))))
           .andThen(Enumerator.enumInput(Input.EOF))
-
         (iteratee,enumerator)
-
     }
 
   }
 
+  def talk(user: User, msg: String): Unit = {
+    default ! Talk(user, HtmlEscapers.htmlEscaper().escape(msg).replace("\n", "<br/>"))
+  }
+
+  def talk(username: String, msg: String): Unit = {
+    ChatRoom.store.get(username).map{ user =>
+      talk(user, msg)
+    }.getOrElse{log.warn(s"Username: $username not found")}
+  }
 }
 
 class ChatRoom extends Actor {
 
-  var members = Set.empty[User]
   val (chatEnumerator, chatChannel) = Concurrent.broadcast[JsValue]
 
   def receive = {
 
     case Join(username) => {
-      if(members.find{u => u.username == username}.isDefined) {
+      ChatRoom.store.get(username).map{ user =>
+        println(ChatRoom.store.list())
         sender ! CannotConnect("This username is already used")
-      } else {
+      }.getOrElse{
         val user = User(username, ChatRoom.randomAvatar())
-        members = members + user
+        ChatRoom.store.save(user)
         sender ! Connected(user, chatEnumerator)
         self ! NotifyJoin(user)
       }
@@ -139,22 +179,20 @@ class ChatRoom extends Actor {
     }
 
     case Quit(user) => {
-      members = members - user
+      ChatRoom.store.remove(user.username)
       notifyAll("quit", user, "has left the room")
     }
 
   }
 
   def notifyAll(kind: String, user: User, text: String) {
-    def userToJson(u: User) = Json.obj("name"->u.username, "avatar"->u.avatar)
+    def userToJson(user: User) = Json.obj("name"->user.username, "avatar"->user.avatar)
     val msg = JsObject(
       Seq(
         "kind" -> JsString(kind),
         "user" -> userToJson(user),
         "message" -> JsString(text),
-        "members" -> JsArray(
-          members.toList.map(userToJson(_))
-        )
+        "members" -> JsArray(ChatRoom.store.list.map(userToJson(_)))
       )
     )
     chatChannel.push(msg)

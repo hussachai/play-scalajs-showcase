@@ -19,4 +19,9 @@ object Routes {
     def giveup = base + "/giveup"
   }
 
+  object Chat {
+    val base = "/chat"
+    def connectSSE(username: String) = base + s"/sse/$username"
+    def talk = base + "/talk"
+  }
 }
