@@ -19,7 +19,7 @@ object TodoController extends Controller{
   implicit val jsonReader = (
     (__ \ 'txt).read[String](minLength[String](2)) and
     (__ \ 'done).read[Boolean]
-  ) tupled
+  ).tupled
 
   def index = Action { implicit request =>
     Ok(views.html.todo("TODO"))
