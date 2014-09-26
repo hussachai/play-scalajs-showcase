@@ -3,7 +3,6 @@ package example
 
 import common.Framework._
 import config.Routes
-import upickle.Implicits._
 import scalatags.JsDom._
 import all._
 import rx._
@@ -15,12 +14,9 @@ import js.Dynamic.{global => g, _}
 import org.scalajs.jquery.{jQuery=>$}
 import shared.Hangman
 import upickle._
-import upickle.Implicits._
 
 @JSExport
 object HangmanJS {
-
-  implicit val hangmanPickler = Case4ReadWriter(Hangman.apply, Hangman.unapply)
 
   object Model {
 
@@ -32,13 +28,14 @@ object HangmanJS {
 
     def start(level: Int = Model.level()) = {
       Ajax.postAsForm(Routes.Hangman.start(level)).map{ r =>
-        game() = r.responseAs[Hangman]
+//        game() = r.responseAs[Hangman]
+        game() = read[Hangman](r.responseText)
       }
     }
 
     def session(callback: (Boolean) => Unit) = {
       Ajax.get(Routes.Hangman.session).map { r =>
-          game() = r.responseAs[Hangman]
+          game() = read[Hangman](r.responseText)
           level() = game().level
           callback(true)
       }.recover{case e => callback(false)}
@@ -47,7 +44,7 @@ object HangmanJS {
     def guess(g: Char)(callback: () => Unit) = {
       Ajax.postAsForm(Routes.Hangman.guess(g)).map{ r =>
         if(r.ok){
-          Model.game() = r.responseAs[Hangman]
+          game() = read[Hangman](r.responseText)
           callback()
         }
       }

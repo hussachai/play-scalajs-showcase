@@ -24,10 +24,7 @@ object TodoJS {
     import org.scalajs.dom.extensions.Ajax
     import org.scalajs.jquery.{jQuery=>$}
     import upickle._
-    import upickle.Implicits._
     import common.ExtAjax._
-
-    implicit val taskPickler = Case3ReadWriter(Task.apply, Task.unapply)
 
     val tasks = Var(List.empty[Task])
 
@@ -58,7 +55,7 @@ object TodoJS {
     def create(txt: String, done: Boolean = false) = {
       val json = s"""{"txt": "${txt}", "done": ${done}}"""
       Ajax.postAsJson(Routes.Todos.create, json).map{ r =>
-        tasks() = r.responseAs[Task] +: tasks()
+        tasks() = read[Task](r.responseText) +: tasks()
       }.recover{case e: AjaxException => dom.alert(e.xhr.responseText)}
     }
 

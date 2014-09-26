@@ -56,7 +56,7 @@ class ExtAjax(ajax: Ajax.type) {
 
 class ExtXMLHttpRequest(req: XMLHttpRequest) {
 
-  def responseAs[T](implicit readWrite: ReadWriter[T]): T = read[T](req.responseText)
+//  def responseAs[T](implicit readWrite: ReadWriter[T]): T = read[T](req.responseText)
 
   def ok = req.status == 200
 

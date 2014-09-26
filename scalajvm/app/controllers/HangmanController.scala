@@ -6,16 +6,13 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.mvc._
 import scala.concurrent.Future
-import upickle.{Json=>_,_}
-import upickle.Implicits._
+import upickle._
 import shared.Hangman
 
 import scala.io.Source
 import scala.util.Random
 
 object HangmanController extends Controller{
-
-  implicit val hangmanPickler = Case4ReadWriter(Hangman.apply, Hangman.unapply)
 
   val sessionName = "hangman"
 

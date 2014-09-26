@@ -40,12 +40,13 @@ object ApplicationBuild extends Build with UniversalKeys {
       scalaVersion := Versions.scala,
       scalacOptions ++= Seq("-feature"),
       routesImport += "config.Routes._",
-      scalajsOutputDir := (crossTarget in Compile).value / "classes" / "public" / "javascripts",
-      compile in Compile <<= (compile in Compile) dependsOn (fastOptJS in (scalajs, Compile)),
+      scalajsOutputDir := (classDirectory in Compile).value / "public" / "javascripts",
+      compile in Compile <<= (compile in Compile) dependsOn (fastOptJS in (scalajs, Compile)) dependsOn copySourceMapsTask,
       dist <<= dist dependsOn (fullOptJS in (scalajs, Compile)),
-      libraryDependencies ++= Dependencies.scalajvm,
-      commands += preStartCommand,
-      EclipseKeys.skipParents in ThisBuild := false
+      stage <<= stage dependsOn (fullOptJS in (scalajs, Compile)),
+      libraryDependencies ++= Dependencies.scalajvm.value,
+      EclipseKeys.skipParents in ThisBuild := false,
+      commands += preStartCommand
     ) ++ (
       // ask scalajs project to put its outputs in scalajsOutputDir
       Seq(packageExternalDepsJS, packageInternalDepsJS, packageExportedProductsJS, packageLauncher, fastOptJS, fullOptJS) map { packageJSKey =>
@@ -60,16 +61,15 @@ object ApplicationBuild extends Build with UniversalKeys {
       scalaVersion := Versions.scala,
       persistLauncher := true,
       persistLauncher in Test := false,
-      libraryDependencies ++= Dependencies.scalajs
+      relativeSourceMaps := true,
+      libraryDependencies ++= Dependencies.scalajs.value
     ) ++ sharedDirectorySettings
 
   lazy val sharedScalaSettings =
     Seq(
       name := "shared-scala-example",
       scalaVersion := Versions.scala,
-      //scalaSource in Compile := baseDirectory.value,
-      EclipseKeys.skipProject := true,
-      libraryDependencies ++= Dependencies.shared
+      libraryDependencies ++= Dependencies.shared.value
     )
 
   lazy val sharedDirectorySettings = Seq(
@@ -78,6 +78,14 @@ object ApplicationBuild extends Build with UniversalKeys {
     unmanagedResourceDirectories in Compile += file(".") / sharedSrcDir / "src" / "main" / "resources",
     unmanagedResourceDirectories in Test += file(".") / sharedSrcDir / "src" / "test" / "resources"
   )
+
+  val copySourceMapsTask = Def.task {
+    val scalaFiles = (Seq(sharedScala.base, scalajs.base) ** ("*.scala")).get
+    for (scalaFile <- scalaFiles) {
+      val target = new File((classDirectory in Compile).value, scalaFile.getPath)
+      IO.copyFile(scalaFile, target)
+    }
+  }
 
   // Use reflection to rename the 'start' command to 'play-start'
   Option(play.Play.playStartCommand.getClass.getDeclaredField("name")) map { field =>
@@ -93,34 +101,34 @@ object ApplicationBuild extends Build with UniversalKeys {
 }
 
 object Dependencies {
-  val shared = Seq()
+  val shared = Def.setting(Seq())
 
-  val scalajvm = Seq(
+  val scalajvm = Def.setting(shared.value ++ Seq(
     filters,
     jdbc,
     anorm,
     "com.typesafe.slick" %% "slick" % "2.1.0",
     "com.typesafe.play" %% "play-slick" % "0.8.0",
-    "com.lihaoyi" %% "upickle" % "0.1.5",
+    "com.lihaoyi" %% "upickle" % "0.2.4",
     "org.webjars" %% "webjars-play" % "2.3.0",
     "org.webjars" % "jquery" % "2.1.1",
     "org.webjars" % "codemirror" % "4.3",
     "org.webjars" % "bootstrap" % "3.2.0",
     "org.webjars" % "font-awesome" % "4.1.0"
-  ) ++ shared
+  ))
 
-  val scalajs = Seq(
+  val scalajs = Def.setting(shared.value ++ Seq(
     "org.scala-lang.modules.scalajs" %%% "scalajs-dom" % Versions.scalajsDom,
     "org.scala-lang.modules.scalajs" %% "scalajs-jasmine-test-framework" % scalaJSVersion % "test",
-    "com.lihaoyi" %%% "upickle" % "0.1.5",
+    "com.lihaoyi" %%% "upickle" % "0.2.4",
     "com.scalatags" %%% "scalatags" % "0.3.8",
     "com.scalarx" %%% "scalarx" % "0.2.5",
     "org.scala-lang.modules.scalajs" %%% "scalajs-jquery" % "0.6"
-  ) ++ shared
+  ))
 }
 
 object Versions {
   val app = "0.1.0-SNAPSHOT"
-  val scala = "2.11.1"
+  val scala = "2.11.2"
   val scalajsDom = "0.6"
 }

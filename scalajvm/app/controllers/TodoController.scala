@@ -8,13 +8,10 @@ import play.api.libs.functional.syntax._
 import play.api.mvc._
 import scala.concurrent.Future
 import models.TaskModel
-import upickle.{Json=>_,_}
-import upickle.Implicits._
+import upickle._
 import shared.Task
 
 object TodoController extends Controller{
-
-  implicit val taskPickler = Case3ReadWriter(Task.apply, Task.unapply)
 
   implicit val jsonReader = (
     (__ \ 'txt).read[String](minLength[String](2)) and
