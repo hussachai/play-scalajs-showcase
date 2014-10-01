@@ -3,7 +3,6 @@ package models
 import java.io.{File, FileFilter}
 
 import akka.actor._
-import com.google.common.escape.Escaper
 import com.google.common.html.HtmlEscapers
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -62,7 +61,7 @@ object ChatUserMemStore extends ChatUserStore {
 
 object Robot {
 
-  val jobsQuotes = Source.fromFile(play.Play.application().getFile("/public/text/jobs-quotes.txt")).mkString.split("\n")
+  val jobsQuotes = Source.fromFile(play.Play.application().getFile("/public/text/jobs-quotes.txt"), "UTF-8").mkString.split("\n")
 
   def apply(chatRoom: ActorRef) {
 
