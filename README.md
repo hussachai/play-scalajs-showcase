@@ -19,7 +19,7 @@ You can create type-safety HTML. It's funny, isn't it?
 
 If you are a big fan of reactive, I can imply that you love Future.
 You are a good planer and Monad is your best friend. Am I right?
-Unsurprisingly, you still can use Future in Scala.js and it will be converted to setTimeout 
+Unsurprisingly, you can use Future in Scala.js as well and it will be converted to setTimeout 
 by compiler. You can add reactive programming paradigm into Scala.js by using 
 [scala-rx](https://github.com/lihaoyi/scala.rx).
 
