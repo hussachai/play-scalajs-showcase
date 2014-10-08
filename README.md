@@ -31,7 +31,7 @@ This project was inspired by [Todo application](http://lihaoyi.github.io/workben
 Right now the project contains 4 examples. 
 - Todo application with backend persistence. (InMemory, Slick, Anorm)
 - Hangman (Inspired from [Yii's demo](http://www.yiiframework.com/demos/hangman/))
-- HTML5 Fileupload (Modified from [How to Use HTML5 File Drag and Drop](http://www.sitepoint.com/html5-file-drag-and-drop/) by Craig Buckler)
+- HTML5 Fileupload (Modified from [How to Use HTML5 File Drag and Drop](http://www.sitepoint.com/html5-file-drag-and-drop/))
 - Server Push Chat. It supports both Websocket and Server-Sent Event
 
 Live demo: http://play-scalajs.hussachai.cloudbees.net
