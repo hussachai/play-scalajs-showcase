@@ -1,0 +1,33 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET           /                            controllers.Application.index
+
+GET           /todos                       controllers.TodoController.index
+GET           /todos/all                   controllers.TodoController.all
+POST          /todos/create                controllers.TodoController.create
+POST          /todos/update/:id            controllers.TodoController.update(id: Long)
+DELETE        /todos/delete/:id            controllers.TodoController.delete(id: Long)
+POST          /todos/clear                 controllers.TodoController.clear
+
+
+GET           /hangman                     controllers.HangmanController.index
+POST          /hangman/start/:level        controllers.HangmanController.start(level: Int)
+GET           /hangman/session             controllers.HangmanController.session
+POST          /hangman/guess/:g            controllers.HangmanController.guess(g: Char)
+POST          /hangman/giveup              controllers.HangmanController.giveup
+
+GET           /upload                      controllers.FileUploadController.index
+POST          /upload                      controllers.FileUploadController.uploadFile
+
+GET           /interop                     controllers.InteropController.index
+
+GET           /chat                        controllers.ChatController.index
+GET           /chat/ws/:username           controllers.ChatController.chatWS(username: String)
+GET           /chat/sse/:username          controllers.ChatController.chatSSE(username: String)
+POST          /chat/talk                   controllers.ChatController.talk
+
+# Map static resources from the /public folder to the /assets URL path
+GET           /assets/*file                controllers.Assets.at(path="/public", file)

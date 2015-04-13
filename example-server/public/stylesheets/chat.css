@@ -1,0 +1,28 @@
+
+#messages {
+    max-height: 250px;
+    overflow-y:auto;
+    overflow-x:hidden;
+}
+
+div.message-box{
+    padding: 10px 0px;
+}
+
+div.message-box-me{
+    padding: 10px 0px;
+    background-color: #b6e2ff;
+}
+
+div.message-icon{
+    text-align: center;
+    padding: 2px 5px;
+}
+
+textarea.message{
+    resize:vertical;
+    width:100%;
+}
+
+
+

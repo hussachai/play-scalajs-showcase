@@ -1,0 +1,16 @@
+@(message: String)(implicit request: RequestHeader)
+
+@content = {
+  <p>
+    Play with Scalajs Kickstart by
+    <a href="https://github.com/vmunier/play-with-scalajs-example" target="_blank">Vincent Munier</a>
+  </p>
+  <h3>Play and Scala.js share a same message</h3>
+  <ul>
+    <li>Play shouts out: <em>@message</em></li>
+    <li>Scala.js shouts out: <em id="scalajsShoutOut"></em></li>
+  </ul>
+}
+@templates.main("Trivial example", content = content){
+    <script src="@routes.Assets.at("javascripts/scalajs-example-launcher.js")" type="text/javascript"></script>
+}
