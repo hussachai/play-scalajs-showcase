@@ -34,8 +34,6 @@ Right now the project contains 4 examples.
 - HTML5 Fileupload (Modified from [How to Use HTML5 File Drag and Drop](http://www.sitepoint.com/html5-file-drag-and-drop/))
 - Server Push Chat. It supports both Websocket and Server-Sent Event
 
-Live demo: http://play-scalajs.hussachai.cloudbees.net
-
 This project uses the same project structure as [play-with-scalajs-example](https://github.com/vmunier/play-with-scalajs-example)
 
 I hope you enjoy learning Play and Scala.js from this project
