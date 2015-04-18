@@ -2,7 +2,7 @@ import sbt.Project.projectToRef
 import play.PlayImport.PlayKeys._
 
 lazy val clients = Seq(exampleClient)
-lazy val scalaV = "2.11.5"
+lazy val scalaV = "2.11.6"
 
 //resolvers += "bintray/non" at "http://dl.bintray.com/non/maven"
 

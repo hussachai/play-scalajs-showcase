@@ -50,7 +50,7 @@ object ScalaJSInterop {
  * You must not declare it as nested class
  */
 class Foo extends js.Object {
-  def test = {
+  def test: Unit = {
     dom.alert("Test add-hoc method")
   }
 }
@@ -63,15 +63,15 @@ class Person(val firstName: String) extends js.Object{
    * If you leave out the return type, scala will put Nothing as the return type
    * and Scala.js doesn't work with Nothing type yet.
    */
-  def walk():Unit = ???
+  def walk(): Unit = js.native
 
-  def sayHello():Unit = ???
+  def sayHello(): Unit = js.native
 }
 
 class Student(firstName: String, val subject: String) extends Person(firstName) {
-  def sayGoodBye():Unit = ???
+  def sayGoodBye(): Unit = js.native
 
-  def notExistInJs():Unit = {
+  def notExistInJs(): Unit = {
     dom.alert("You will not see this")
   }
 }
