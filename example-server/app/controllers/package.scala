@@ -3,6 +3,7 @@ package controllers
 import play.api.http.{Writeable, ContentTypes, ContentTypeOf}
 import play.api.libs.json.JsError
 import play.api.mvc.{Request, Codec}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object `package` {
 

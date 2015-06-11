@@ -5,7 +5,6 @@ import shared.Task
 import play.api.Play.current
 import scala.concurrent.ExecutionContext.Implicits.global
 
-
 object TaskModel {
 
   val store: TaskStore = current.configuration.getString("module.todo.store") match {
@@ -23,7 +22,7 @@ object TaskModel {
 
 trait TaskStore {
 
-  def all: Future[List[Task]]
+  def all: Future[Seq[Task]]
 
   def create(txt: String, done: Boolean): Future[Task]
 
@@ -53,7 +52,7 @@ object TaskMemStore extends TaskStore {
     seq
   }
 
-  override def all(): Future[List[Task]] = Future{
+  override def all(): Future[Seq[Task]] = Future{
     store.values.toList.sortBy(- _.id.get)
   }
 
@@ -90,9 +89,8 @@ object TaskMemStore extends TaskStore {
 
 object TaskSlickStore extends TaskStore {
 
-  import play.api.db.slick.Config.driver.simple._
-  //import scala.slick.driver.H2Driver.simple._
-  import play.api.db.slick._
+  import play.api.db.DB
+  import slick.driver.H2Driver.api._
 
   //H2 always uses all upper case. That's annoying!!!
   class Tasks(tag: Tag) extends Table[Task](tag, "TASKS"){
@@ -102,37 +100,36 @@ object TaskSlickStore extends TaskStore {
     def * = (id, txt, done) <> (Task.tupled, Task.unapply)
   }
 
+
+  private def db: Database = Database.forDataSource(DB.getDataSource())
+
   val tasks = TableQuery[Tasks]
 
-  override def all(): Future[List[Task]] = Future{
-    DB.withSession{ implicit session =>
-      tasks.sortBy(_.id.desc).list
-    }
+  override def all(): Future[Seq[Task]] = {
+    db.run(tasks.sortBy(_.id.desc).result)
   }
 
-  override def create(txt: String, done: Boolean): Future[Task] = Future{
-    DB.withSession{ implicit session =>
+  override def create(txt: String, done: Boolean): Future[Task] = {
+    db.run{
       (tasks returning tasks.map(_.id) into ((task,id) => task.copy(id=id))) += Task(None, txt, done)
     }
   }
 
-  override def update(task: Task): Future[Boolean] = Future{
-    DB.withSession{ implicit session =>
+  override def update(task: Task): Future[Boolean] = {
+    db.run{
       val q = for { t <- tasks if t.id === task.id } yield (t.txt, t.done)
-      q.update(task.txt, task.done) == 1
+      q.update(task.txt, task.done)
+    }.map(_ == 1)
+  }
+
+  override def delete(ids: Long*): Future[Boolean] = {
+    Future.sequence(for(id <- ids) yield { db.run(tasks.filter(_.id === id).delete).map(_==1)}).map{
+      _.find(i => i == false) == None
     }
   }
 
-  override def delete(ids: Long*): Future[Boolean] = Future{
-    DB.withTransaction { implicit session =>
-      (for(id <- ids) yield {
-        tasks.filter(_.id === id).delete == 1
-      }).find(i=>i==false) == None
-    }
-  }
-
-  override def clearCompletedTasks: Future[Int] = Future{
-    DB.withSession{ implicit session =>
+  override def clearCompletedTasks: Future[Int] = {
+    db.run{
       tasks.filter(_.done === true).delete
     }
   }
@@ -143,7 +140,7 @@ object TaskAnormStore extends TaskStore{
   import anorm.SqlParser._
   import play.api.db.DB
 
-  override def all(): Future[List[Task]] = Future{
+  override def all(): Future[Seq[Task]] = Future{
     DB.withConnection { implicit c =>
       SQL("SELECT * FROM Tasks ORDER BY id DESC").as(long("id").? ~ str("txt") ~ bool("done") *).map{
         case id ~ txt ~ done => Task(id, txt, done)
