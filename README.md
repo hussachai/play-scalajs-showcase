@@ -1,4 +1,5 @@
 # Play Framework with Scala.js Showcase
+Versions: Scala: 2.11.6, Play: 2.4, Scala.js: 0.6.3
 
 This project was inspired by [Todo application](http://lihaoyi.github.io/workbench-example-app/todo.html)
 
