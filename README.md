@@ -1,5 +1,5 @@
 # Play Framework with Scala.js Showcase
-###Scala: 2.11.6, Play: 2.4, Scala.js: 0.6.3
+###Scala: 2.11.6, Scala.js: 0.6.3, Play: 2.4.0, Slick: 3.0.0
 
 This project was inspired by [Todo application](http://lihaoyi.github.io/workbench-example-app/todo.html)
 
