@@ -22,7 +22,7 @@ object TodoJS {
     import scala.scalajs.js
     import js.Dynamic.{global => g}
     import org.scalajs.jquery.{jQuery=>$}
-    import upickle._
+    import upickle.default._
     import common.ExtAjax._
 
     val tasks = Var(List.empty[Task])

@@ -8,7 +8,7 @@ import play.api.libs.functional.syntax._
 import play.api.mvc._
 import scala.concurrent.Future
 import models.TaskModel
-import upickle._
+import upickle.default._
 import shared.Task
 
 object TodoController extends Controller{

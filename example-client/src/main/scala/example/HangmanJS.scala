@@ -15,7 +15,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import js.Dynamic.{global => g, _}
 import org.scalajs.jquery.{jQuery=>$}
 import shared.Hangman
-import upickle._
+import upickle.default._
 
 @JSExport
 object HangmanJS {

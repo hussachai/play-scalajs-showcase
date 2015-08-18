@@ -51,7 +51,7 @@ object ScalaJSInterop {
  */
 class Foo extends js.Object {
   def test: Unit = {
-    dom.alert("Test add-hoc method")
+    dom.alert("Test add-hoc method") /* deprecated */
   }
 }
 
@@ -71,7 +71,5 @@ class Person(val firstName: String) extends js.Object{
 class Student(firstName: String, val subject: String) extends Person(firstName) {
   def sayGoodBye(): Unit = js.native
 
-  def notExistInJs(): Unit = {
-    dom.alert("You will not see this")
-  }
+  def notExistInJs(): Unit = js.native
 }
