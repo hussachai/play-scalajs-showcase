@@ -20,6 +20,12 @@ The project contains 4 simple examples.
 - HTML5 Fileupload (Modified from [How to Use HTML5 File Drag and Drop](http://www.sitepoint.com/html5-file-drag-and-drop/))
 - Server Push Chat. It supports both Websocket and Server-Sent Event
 
+### Prerequisite steps
+Before running the application, you may need to do these steps:
+1. Add the folowing to ~/.sbt/0.13/plugins/plugins.sbt
+
+    addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.5.0")
+
 ### Run the application
 ```
 $ sbt
