@@ -73,3 +73,29 @@ class Student(firstName: String, val subject: String) extends Person(firstName) 
 
   def notExistInJs(): Unit = js.native
 }
+
+import org.scalajs.dom._
+
+/**
+ * A MessageEvent is sent to clients using WebSockets when data is received from the
+ * server. This is delivered to the listener indicated by the WebSocket object's
+ * onmessage attribute.
+ *
+ * MDN
+ */
+class MessageEvent extends Event {
+  def source: Window = js.native
+
+  def origin: String = js.native
+
+  /**
+   * The data from the server (`String`, [[Blob]], or `ArrayBuffer`)
+   *
+   * MDN
+   */
+  def data: Any = js.native
+
+  def initMessageEvent(typeArg: String, canBubbleArg: Boolean, cancelableArg: Boolean, dataArg: js.Any, originArg: String, lastEventIdArg: String, sourceArg: Window): Unit = js.native
+
+  def ports: js.Any = js.native
+}
