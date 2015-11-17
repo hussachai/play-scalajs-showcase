@@ -1,8 +1,8 @@
 # Play Framework with Scala.js Showcase
 ###Scala: 2.11.6, Scala.js: 0.6.5, Play: 2.4.0, Slick: 3.0.0
 
-This is a small application showing how cool Scala.js is. You can share the code regardless of layer in architecture.
-Beside CSS and a few lines of HTML, almost all code in this project are type safety including HTML (Thanks to [scalatags](https://github.com/lihaoyi/scalatags)). I made this project for learning purpose during my summer intern.
+This is a small application showing how cool Scala.js is. You can share the code regardless of a layer in an architecture.
+Beside CSS and a few lines of HTML, almost all code in this project are type-safety including HTML (Thanks to [scalatags](https://github.com/lihaoyi/scalatags)). I made this project for learning purpose during my summer intern.
 So, the code you will see in this project may be not a good practice but I hope you can learn something from it like I did.
 I will try to keep it update to make sure that it will run with the recent version of Scala.js.
 
