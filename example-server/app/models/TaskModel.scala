@@ -11,6 +11,7 @@ object TaskModel {
     case Some(impl) => impl match {
       case "Anorm" => TaskAnormStore
       case "Slick" => TaskSlickStore
+      case "Gremlin" => TaskGremlinStore
       case _ => TaskMemStore
     }
     case None => TaskMemStore
@@ -132,6 +133,52 @@ object TaskSlickStore extends TaskStore {
     db.run{
       tasks.filter(_.done === true).delete
     }
+  }
+}
+
+object TaskGremlinStore extends TaskStore {
+  import gremlin.scala._
+  import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph
+
+  val taskLabel = "task"
+  val Name = Key[String]("name")
+  val Done = Key[Boolean]("done")
+
+  private val graph: ScalaGraph[TinkerGraph] = {
+    val graph: ScalaGraph[TinkerGraph] = TinkerGraph.open().asScala
+    (1 to 5) foreach { i =>
+      graph + ("some_label", Name -> s"vertex $i")
+    }
+    graph
+  }
+
+  override def all: Future[Seq[Task]] = Future {
+    graph.V.hasLabel(taskLabel).map { v => Task(Some(v.id().asInstanceOf[Long]), v.value2(Name), v.value2(Done)) }.toList()
+  }
+
+  override def create(txt: String, done: Boolean): Future[Task] = Future {
+    val vertex = graph + (taskLabel, Name -> txt, Done -> done)
+    Task(Some(vertex.id().asInstanceOf[Long]), txt, done)
+  }
+
+  override def update(task: Task): Future[Boolean] = Future {
+    task.id.flatMap(graph.v(_)).map(_.setProperty(Name, task.txt).setProperty(Done, task.done)).isDefined
+  }
+
+  override def delete(ids: Long*): Future[Boolean] = Future {
+    if (ids.isEmpty) {
+      false
+    } else {
+      val vertices = graph.vertices(ids)
+      vertices.foreach(_.remove())
+      vertices.nonEmpty
+    }
+  }
+
+  override def clearCompletedTasks: Future[Int] = Future {
+    val tasks = graph.V.hasLabel(taskLabel).has(Done, true).toList()
+    tasks.foreach(_.remove())
+    tasks.size
   }
 }
 

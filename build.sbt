@@ -16,6 +16,8 @@ lazy val exampleServer = (project in file("example-server")).settings(
     filters,
     jdbc,
     evolutions,
+    "com.michaelpollmeier" %% "gremlin-scala" % "3.1.0-incubating",
+    "org.neo4j" % "neo4j-tinkerpop-api-impl" % "0.1-2.2",
     "com.typesafe.play" %% "anorm" % "2.5.0",
     "com.vmunier" %% "play-scalajs-scripts" % "0.3.0",
     "com.typesafe.slick" %% "slick" % "3.0.2",
