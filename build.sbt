@@ -47,7 +47,19 @@ lazy val exampleClient = (project in file("example-client")).settings(
   dependsOn(exampleSharedJs)
 
 lazy val exampleShared = (crossProject.crossType(CrossType.Pure) in file("example-shared")).
-  settings(scalaVersion := scalaV).
+  settings(
+    scalaVersion := scalaV
+  ).
+  jsSettings(
+    libraryDependencies ++= Seq(
+      "com.lihaoyi" %%% "upickle" % "0.3.4"
+    )
+  ).
+  jvmSettings(
+    libraryDependencies ++= Seq(
+      "com.lihaoyi" %% "upickle" % "0.3.4"
+    )
+  ).
   jsConfigure(_ enablePlugins ScalaJSPlay)
 
 lazy val exampleSharedJvm = exampleShared.jvm
