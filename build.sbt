@@ -50,16 +50,19 @@ lazy val exampleClient = (project in file("example-client")).settings(
 
 lazy val exampleShared = (crossProject.crossType(CrossType.Pure) in file("example-shared")).
   settings(
-    scalaVersion := scalaV
+    scalaVersion := scalaV,
+    testFrameworks += new TestFramework("utest.runner.Framework")
   ).
   jsSettings(
     libraryDependencies ++= Seq(
-      "com.lihaoyi" %%% "upickle" % "0.3.4"
+      "com.lihaoyi" %%% "upickle" % "0.3.4",
+      "com.lihaoyi" %%% "utest" % "0.3.0" % "test"
     )
   ).
   jvmSettings(
     libraryDependencies ++= Seq(
-      "com.lihaoyi" %% "upickle" % "0.3.4"
+      "com.lihaoyi" %% "upickle" % "0.3.4",
+      "com.lihaoyi" %% "utest" % "0.3.0" % "test"
     )
   ).
   jsConfigure(_ enablePlugins ScalaJSPlay)
