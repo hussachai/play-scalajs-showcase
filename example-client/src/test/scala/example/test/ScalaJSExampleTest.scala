@@ -1,20 +1,20 @@
 package example
 package test
 
+import utest._
 import scala.scalajs.js
 import js.Dynamic.{ global => g }
-import scala.scalajs.test.JasmineTest
 
-object ScalaJSExampleTest extends JasmineTest {
+object ScalaJSExampleTest extends TestSuite {
+  def tests = TestSuite {
+    "ScalaJSExample" - {
+      "should implement square()" - {
+        import ExampleJS._
 
-  describe("ScalaJSExample") {
-
-    it("should implement square()") {
-      import ExampleJS._
-
-      expect(square(0)).toBe(0)
-      expect(square(4)).toBe(16)
-      expect(square(-5)).toBe(25)
+        assert(square(0) == 0)
+        assert(square(4) == 16)
+        assert(square(-5) == 25)
+      }
     }
   }
 }

@@ -26,7 +26,8 @@ lazy val exampleServer = (project in file("example-server")).settings(
     "org.webjars" %% "webjars-play" % "2.4.0",
     "org.webjars" % "bootstrap" % "3.3.5",
     "org.webjars" % "jquery" % "2.1.4",
-    "org.webjars" % "font-awesome" % "4.4.0"
+    "org.webjars" % "font-awesome" % "4.4.0",
+    "com.lihaoyi" %% "utest" % "0.3.0" % "test"
   )
  ).enablePlugins(PlayScala).
   aggregate(clients.map(projectToRef): _*).
@@ -41,7 +42,8 @@ lazy val exampleClient = (project in file("example-client")).settings(
     "com.lihaoyi" %%% "scalatags" % "0.5.2",
     "com.lihaoyi" %%% "scalarx" % "0.2.8",
     "be.doeraene" %%% "scalajs-jquery" % "0.8.0",
-    "com.lihaoyi" %%% "upickle" % "0.3.4"
+    "com.lihaoyi" %%% "upickle" % "0.3.4",
+    "com.lihaoyi" %%% "utest" % "0.3.0" % "test"
   )
 ).enablePlugins(ScalaJSPlugin, ScalaJSPlay).
   dependsOn(exampleSharedJs)
