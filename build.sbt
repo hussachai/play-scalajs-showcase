@@ -48,17 +48,23 @@ lazy val exampleClient = (project in file("example-client")).settings(
 ).enablePlugins(ScalaJSPlugin, ScalaJSPlay).
   dependsOn(exampleSharedJs)
 
-lazy val exampleShared = (crossProject.crossType(CrossType.Pure) in file("example-shared")).
+val exampleSharedJvmSettings = List(
+  libraryDependencies ++= Seq(
+    "com.lihaoyi" %% "upickle" % "0.3.4",
+    "com.lihaoyi" %% "utest" % "0.3.0" % "test"
+  )
+)
+val exampleSharedForIDE = (project in file("example-shared")).settings(
+  (scalaVersion := scalaV) +:
+  (testFrameworks += new TestFramework("utest.runner.Framework")) +:
+  exampleSharedJvmSettings :_*)
+
+val exampleShared = (crossProject.crossType(CrossType.Pure) in file("example-shared")).
   settings(
     scalaVersion := scalaV,
     testFrameworks += new TestFramework("utest.runner.Framework")
   ).
-  jvmSettings(
-    libraryDependencies ++= Seq(
-      "com.lihaoyi" %% "upickle" % "0.3.4",
-      "com.lihaoyi" %% "utest" % "0.3.0" % "test"
-    )
-  ).
+  jvmSettings(exampleSharedJvmSettings: _*).
   jsSettings(
     libraryDependencies ++= Seq(
       "com.lihaoyi" %%% "upickle" % "0.3.4",
