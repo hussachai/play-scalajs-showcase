@@ -54,6 +54,7 @@ val exampleSharedJvmSettings = List(
     "com.lihaoyi" %% "utest" % "0.3.0" % "test"
   )
 )
+
 val exampleSharedForIDE = (project in file("example-shared")).settings(
   (scalaVersion := scalaV) +:
   (testFrameworks += new TestFramework("utest.runner.Framework")) +:
@@ -70,8 +71,7 @@ val exampleShared = (crossProject.crossType(CrossType.Pure) in file("example-sha
       "com.lihaoyi" %%% "upickle" % "0.3.4",
       "com.lihaoyi" %%% "utest" % "0.3.0" % "test"
     )
-  ).
-  jsConfigure(_ enablePlugins ScalaJSPlay)
+  )
 
 lazy val exampleSharedJvm = exampleShared.jvm
 lazy val exampleSharedJs = exampleShared.js
