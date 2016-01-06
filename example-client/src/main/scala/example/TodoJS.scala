@@ -52,14 +52,14 @@ object TodoJS {
     def all: List[Task] = tasks()
 
     def create(txt: String, done: Boolean = false) = {
-      val json = s"""{"txt": "${txt}", "done": ${done}}"""
+      val json = write(Task(None, txt, done))
       Ajax.postAsJson(Routes.Todos.create, json).map{ r =>
         tasks() = read[Task](r.responseText) +: tasks()
       }.recover{case e: AjaxException => dom.alert(e.xhr.responseText)}
     }
 
     def update(task: Task) = {
-      val json = s"""{"txt": "${task.txt}", "done": ${task.done}}"""
+      val json = write(task)
       task.id.map{ id =>
         Ajax.postAsJson(Routes.Todos.update(id), json).map{ r =>
           if(r.ok){
