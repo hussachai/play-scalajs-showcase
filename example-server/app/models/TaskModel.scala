@@ -169,7 +169,7 @@ object TaskGremlinStore extends TaskStore {
     if (ids.isEmpty) {
       false
     } else {
-      val vertices = graph.vertices(ids)
+      val vertices = ids.flatMap(graph.v(_))
       vertices.foreach(_.remove())
       vertices.nonEmpty
     }
