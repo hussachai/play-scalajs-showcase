@@ -7,9 +7,9 @@ GET           /                            controllers.Application.index
 
 GET           /todos                       controllers.TodoController.index
 GET           /todos/all                   controllers.TodoController.all
-POST          /todos/create                controllers.TodoController.create
-POST          /todos/update/:id            controllers.TodoController.update(id: Long)
-DELETE        /todos/delete/:id            controllers.TodoController.delete(id: Long)
+POST          /todos                       controllers.TodoController.create
+POST          /todos/:id                   controllers.TodoController.update(id: Long)
+DELETE        /todos/:id                   controllers.TodoController.delete(id: Long)
 POST          /todos/clear                 controllers.TodoController.clear
 
 
