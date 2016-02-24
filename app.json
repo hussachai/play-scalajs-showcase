@@ -1,0 +1,6 @@
+{
+  "name": "Play Framework with Scala.js Showcase",
+  "description": "This is a small application showing how cool Scala.js is.",
+  "image": "heroku/scala",
+  "addons": [ ]
+}

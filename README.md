@@ -29,6 +29,16 @@ $ sbt
 $ open http://localhost:9000
 ```
 
+### Run the application on heroku
+
+- Install the [heroku toolbelt](https://devcenter.heroku.com/articles/getting-started-with-scala#set-up)
+- ``` 
+$ heroku login
+$ heroku create
+$ git push heroku master
+$ heroku open
+```
+
 ## Features
 
 The application uses the [sbt-play-scalajs](https://github.com/vmunier/sbt-play-scalajs) sbt plugin and the [play-scalajs-scripts](https://github.com/vmunier/play-scalajs-scripts) library.
