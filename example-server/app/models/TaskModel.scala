@@ -11,6 +11,7 @@ object TaskModel {
     case Some(impl) => impl match {
       case "Anorm" => TaskAnormStore
       case "Slick" => TaskSlickStore
+      case "Gremlin" => TaskGremlinStore
       case _ => TaskMemStore
     }
     case None => TaskMemStore
@@ -24,7 +25,7 @@ trait TaskStore {
 
   def all: Future[Seq[Task]]
 
-  def create(txt: String, done: Boolean): Future[Task]
+  def create(taskWithoutId: Task): Future[Task]
 
   def update(task: Task): Future[Boolean]
 
@@ -56,18 +57,18 @@ object TaskMemStore extends TaskStore {
     store.values.toList.sortBy(- _.id.get)
   }
 
-  override def create(txt: String, done: Boolean): Future[Task] = Future{
+  override def create(taskWithoutId: Task): Future[Task] = Future{
     if(store.size >= maxSize) throw new InsufficientStorageException("quota exceed for demo:"+maxSize)
-    val task = Task(Some(sequence()), txt, done)
+    val task = taskWithoutId.copy(id = Some(sequence()))
     store += (task.id.get -> task)
     task
   }
 
   override def update(task: Task): Future[Boolean] = Future{
-    task.id.map{ id =>
+    task.id.exists { id =>
       store += (id -> task)
       true
-    }.getOrElse(false)
+    }
   }
 
   override def delete(ids: Long*): Future[Boolean] = Future{
@@ -109,9 +110,9 @@ object TaskSlickStore extends TaskStore {
     db.run(tasks.sortBy(_.id.desc).result)
   }
 
-  override def create(txt: String, done: Boolean): Future[Task] = {
+  override def create(taskWithoutId: Task): Future[Task] = {
     db.run{
-      (tasks returning tasks.map(_.id) into ((task,id) => task.copy(id=id))) += Task(None, txt, done)
+      (tasks returning tasks.map(_.id) into ((task,id) => task.copy(id=id))) += taskWithoutId
     }
   }
 
@@ -135,6 +136,52 @@ object TaskSlickStore extends TaskStore {
   }
 }
 
+object TaskGremlinStore extends TaskStore {
+  import gremlin.scala._
+  import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph
+
+  val taskLabel = "task"
+  val Name = Key[String]("name")
+  val Done = Key[Boolean]("done")
+
+  private val graph: ScalaGraph[TinkerGraph] = {
+    val graph: ScalaGraph[TinkerGraph] = TinkerGraph.open().asScala
+    (1 to 5) foreach { i =>
+      graph + ("some_label", Name -> s"vertex $i")
+    }
+    graph
+  }
+
+  override def all: Future[Seq[Task]] = Future {
+    graph.V.hasLabel(taskLabel).map { v => Task(Some(v.id().asInstanceOf[Long]), v.value2(Name), v.value2(Done)) }.toList()
+  }
+
+  override def create(taskWithoutId: Task): Future[Task] = Future {
+    val vertex = graph + (taskLabel, Name -> taskWithoutId.txt, Done -> taskWithoutId.done)
+    taskWithoutId.copy(id = Some(vertex.id().asInstanceOf[Long]))
+  }
+
+  override def update(task: Task): Future[Boolean] = Future {
+    task.id.flatMap(graph.v(_)).map(_.setProperty(Name, task.txt).setProperty(Done, task.done)).isDefined
+  }
+
+  override def delete(ids: Long*): Future[Boolean] = Future {
+    if (ids.isEmpty) {
+      false
+    } else {
+      val vertices = ids.flatMap(graph.v(_))
+      vertices.foreach(_.remove())
+      vertices.nonEmpty
+    }
+  }
+
+  override def clearCompletedTasks: Future[Int] = Future {
+    val tasks = graph.V.hasLabel(taskLabel).has(Done, true).toList()
+    tasks.foreach(_.remove())
+    tasks.size
+  }
+}
+
 object TaskAnormStore extends TaskStore{
   import anorm._
   import anorm.SqlParser._
@@ -148,11 +195,11 @@ object TaskAnormStore extends TaskStore{
     }
   }
 
-  override def create(txt: String, done: Boolean): Future[Task] = Future{
+  override def create(taskWithoutId: Task): Future[Task] = Future{
     DB.withConnection { implicit c =>
       val id: Option[Long] = SQL("INSERT INTO Tasks(txt, done) VALUES({txt}, {done})")
-        .on('txt -> txt, 'done -> done).executeInsert()
-      Task(id, txt, done)
+        .on('txt -> taskWithoutId.txt, 'done -> taskWithoutId.done).executeInsert()
+      taskWithoutId.copy(id = id)
     }
   }
 

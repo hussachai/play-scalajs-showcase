@@ -2,21 +2,14 @@ package controllers
 
 import models.TaskMemStore.InsufficientStorageException
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json._
-import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
 import play.api.mvc._
+import upickle.Invalid
 import scala.concurrent.Future
 import models.TaskModel
 import upickle.default._
 import shared.Task
 
 object TodoController extends Controller{
-
-  implicit val jsonReader = (
-    (__ \ 'txt).read[String](minLength[String](2)) and
-    (__ \ 'done).read[Boolean]
-  ).tupled
 
   def index = Action { implicit request =>
     Ok(views.html.todo("TODO"))
@@ -30,33 +23,35 @@ object TodoController extends Controller{
     }
   }
 
-  def create = Action.async(parse.json){ implicit request =>
-    val fn = (txt: String, done: Boolean) =>
-      TaskModel.store.create(txt, done).map{ r =>
+  def create = Action.async(parse.tolerantText){ implicit request =>
+    executeRequestWithData[Task] { task =>
+      TaskModel.store.create(task).map{ r =>
         Ok(write(r))
       }.recover{
         case e: InsufficientStorageException => InsufficientStorage(e)
         case e: Throwable => InternalServerError(e)
       }
-    executeRequest(fn)
+    }
   }
 
-  def update(id: Long) = Action.async(parse.json){ implicit request =>
-    val fn = (txt: String, done: Boolean) =>
-      TaskModel.store.update(Task(Some(id), txt, done)).map{ r =>
+  def update(id: Long) = Action.async(parse.tolerantText){ implicit request =>
+    executeRequestWithData[Task] { task =>
+      TaskModel.store.update(task.copy(id = Some(id))).map{ r =>
         if(r) Ok else BadRequest
       }.recover{ case e => InternalServerError(e)}
-    executeRequest(fn)
+    }
   }
 
-  def executeRequest(fn: (String, Boolean) => Future[Result])
-    (implicit request: Request[JsValue]) = {
-    request.body.validate[(String, Boolean)].map{
-      case (txt, done) => {
-        fn(txt, done)
-      }
-    }.recoverTotal{
-      e => Future(BadRequest(e))
+  private def executeRequestWithData[T : Reader](fn: T => Future[Result])
+    (implicit request: Request[String]) = {
+    if (!request.contentType.exists(_.endsWith("json"))) {
+      Future(NotAcceptable)
+    }
+    try {
+      val data = read[T](request.body)
+      fn(data)
+    } catch {
+      case e: Invalid => Future(BadRequest(e))
     }
   }
 

@@ -14,17 +14,35 @@ The sbt build file contains 3 modules
 This project would not exist if I didn't find this kick-ass example 
 [play-with-scalajs-example](https://github.com/vmunier/play-with-scalajs-example).
 
-The project contains 4 simple examples. 
-- Todo application with backend persistence.(Modified from [Todo application](http://lihaoyi.github.io/workbench-example-app/todo.html)) 
+The project contains 4 simple examples:
+
+- Todo application with backend persistence.(Modified from [Todo application](http://lihaoyi.github.io/workbench-example-app/todo.html))
+  - InMemory, Slick, Anorm, Gremlin (Selectable in application.conf)
 - Hangman (Inspired by [Yii's demo](http://www.yiiframework.com/demos/hangman/))
 - HTML5 Fileupload (Modified from [How to Use HTML5 File Drag and Drop](http://www.sitepoint.com/html5-file-drag-and-drop/))
 - Server Push Chat. It supports both Websocket and Server-Sent Event
+
+### Prerequisite steps
+Before running the application, you may need to do these steps:
+1. Add the folowing to ~/.sbt/0.13/plugins/plugins.sbt
+
+    addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.5.0")
 
 ### Run the application
 ```
 $ sbt
 > run
 $ open http://localhost:9000
+```
+
+### Run the application on heroku
+
+- Install the [heroku toolbelt](https://devcenter.heroku.com/articles/getting-started-with-scala#set-up)
+- ``` 
+$ heroku login
+$ heroku create
+$ git push heroku master
+$ heroku open
 ```
 
 ## Features

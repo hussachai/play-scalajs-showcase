@@ -1,30 +1,32 @@
-import org.specs2.mutable._
-import org.specs2.runner._
-import org.junit.runner._
-
+import utest._
 import play.api.test._
 import play.api.test.Helpers._
+import play.test.WithApplication
 
 /**
  * Add your spec here.
  * You can mock out a whole application including requests, plugins etc.
  * For more information, consult the wiki.
  */
-@RunWith(classOf[JUnitRunner])
-class ApplicationSpec extends Specification {
+object ApplicationSpec extends TestSuite {
+  def tests = TestSuite {
+    "Application should" - {
 
-  "Application" should {
+      "send 404 on a bad request" - {
+        new WithApplication {
+          assert(route(FakeRequest(GET, "/boum")).isEmpty)
+        }
+      }
 
-    "send 404 on a bad request" in new WithApplication{
-      route(FakeRequest(GET, "/boum")) must beNone
-    }
+      "render the index page" - {
+        new WithApplication {
+          val home = route(FakeRequest(GET, "/")).get
 
-    "render the index page" in new WithApplication{
-      val home = route(FakeRequest(GET, "/")).get
-
-      status(home) must equalTo(OK)
-      contentType(home) must beSome.which(_ == "text/html")
-      contentAsString(home) must contain ("shouts out")
+          assert(status(home) == OK)
+          assert(contentType(home).contains("text/html"))
+          assert(contentAsString(home).contains("shouts out"))
+        }
+      }
     }
   }
 }
