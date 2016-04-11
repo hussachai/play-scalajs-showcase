@@ -38,7 +38,8 @@ $ open http://localhost:9000
 ### Run the application on heroku
 
 - Install the [heroku toolbelt](https://devcenter.heroku.com/articles/getting-started-with-scala#set-up)
-- ``` 
+- Run following commands:
+``` 
 $ heroku login
 $ heroku create
 $ git push heroku master
