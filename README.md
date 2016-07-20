@@ -1,10 +1,19 @@
 # Play Framework with Scala.js Showcase
 ###Scala: 2.11.6, Scala.js: 0.6.5, Play: 2.4.0, Slick: 3.0.0
 
-This is a small application showing how cool Scala.js is. You can share the code regardless of a layer in an architecture.
+#### Update: July 2016 
+This project was started on Oct 2014 when Scala.js was still an experimental project. I didn't expect Scala.js to come this far because there were a lot of Scala projects that were discontinued. Surprisingly, it's not just still alive but keeps growing. 
+I have to catch up what I missed for almost 2 years, and start looking for something cool to learn as usual.(Stay hungry, still foolish LoL)  
+I'm looking forward to using this: https://github.com/japgolly/scalajs-react/tree/topic/neo   
+The new version I plan in my head is to use React and Microservice. 
+
+___
+
+This is a small application showing how cool Scala.js is. You can share code across platforms. For the shared code,
+the Scala compiler compiles your Scala code to JVM byte code, and the ScalaJS compiler compiles the same Scala code to JavaScript.
 Beside CSS and a few lines of HTML, almost all code in this project are type-safety including HTML (Thanks to [scalatags](https://github.com/lihaoyi/scalatags)). I made this project for learning purpose during my summer intern.
-So, the code you will see in this project may be not a good practice but I hope you can learn something from it like I did.
-I will try to keep it update to make sure that it will run with the recent version of Scala.js.
+So, the code you will see in this project may look not good, but I hope you can learn something from it like I did.
+~~I will try to keep it update-to-date to make sure that it will run with the recent version of Scala.js.~~
 
 The sbt build file contains 3 modules
 - `exampleServer` Play application (server side)
@@ -26,7 +35,7 @@ The project contains 4 simple examples:
 Before running the application, you may need to do these steps:
 1. Add the folowing to ~/.sbt/0.13/plugins/plugins.sbt
 
-    addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.5.0")
+    addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "4.0.0")
 
 ### Run the application
 ```
